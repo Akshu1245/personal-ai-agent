@@ -1,0 +1,102 @@
+version: "1.0"
+policy_id: "default-policy"
+name: "AKSHAY AI CORE Default Security Policy"
+description: "Default security policy for system startup"
+created_at: "2026-01-19T00:00:00Z"
+
+trust_zones:
+  system:
+    description: "System-level operations (Terminal, internal)"
+    level: 100
+    permissions:
+      - "*"
+  operator:
+    description: "Operator/Admin with MFA"
+    level: 75
+    permissions:
+      - "system.*"
+      - "policy.*"
+      - "user.*"
+      - "automation.*"
+  user:
+    description: "Standard authenticated user"
+    level: 50
+    permissions:
+      - "query.*"
+      - "memory.*"
+      - "plugin.execute"
+      - "iot.device_control"
+      - "file.read"
+  guest:
+    description: "Guest/unauthenticated user"
+    level: 25
+    permissions:
+      - "system.status"
+      - "plugin.list"
+
+permissions:
+  terminal:
+    enabled: true
+    rate_limit: 1000
+    require_confirmation: false
+  
+  api:
+    enabled: true
+    rate_limit: 200
+    require_confirmation: false
+    require_mfa: false
+  
+  voice:
+    enabled: true
+    rate_limit: 30
+    require_confirmation: true
+    blocked_actions:
+      - "system.shutdown"
+      - "system.reboot"
+      - "policy.delete"
+      - "user.delete"
+      - "data.wipe"
+  
+  automation:
+    enabled: true
+    rate_limit: 500
+    require_confirmation: false
+  
+  file_access:
+    enabled: true
+    allowed_paths:
+      - "$HOME/.akshay"
+      - "$INSTALL_PATH/data"
+      - "$INSTALL_PATH/config"
+    blocked_paths:
+      - "$WINDOWS"
+      - "$SYSTEM"
+      - "$SYSTEM32"
+  
+  network:
+    enabled: true
+    require_mfa_for_external: true
+    blocked_domains: []
+
+safe_mode:
+  enabled: true
+  allowed_actions:
+    - "system.status"
+    - "policy.status"
+    - "memory.read"
+    - "audit.read"
+    - "emergency.lock"
+  restrictions:
+    - "read_only"
+    - "no_write_operations"
+    - "no_external_connections"
+
+audit:
+  enabled: true
+  log_level: "INFO"
+  immutable: true
+  sensitive_operations:
+    - "key_access"
+    - "policy_change"
+    - "auth_attempt"
+    - "admin_action"

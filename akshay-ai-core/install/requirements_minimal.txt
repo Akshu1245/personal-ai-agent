@@ -1,0 +1,6 @@
+﻿# Minimal test requirements (all have Python 3.14 wheels)
+httpx>=0.25.0
+pydantic>=2.5.0
+PyYAML>=6.0.0
+cryptography>=41.0.0
+PyJWT>=2.8.0

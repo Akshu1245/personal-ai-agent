@@ -1,0 +1,93 @@
+# ============================================================
+# AKSHAY AI CORE — Automation Rules Configuration
+# ============================================================
+# Define automation rules that run based on triggers.
+# ============================================================
+
+rules:
+  # Example: Daily backup at midnight
+  - name: "Daily Backup"
+    description: "Backup important data every day at midnight"
+    trigger:
+      type: schedule
+      cron: "0 0 * * *"  # Every day at midnight
+    actions:
+      - plugin: file_vault
+        command: backup
+        params:
+          target: "./backups"
+    conditions:
+      - type: time_range
+        start: "00:00"
+        end: "06:00"
+    is_enabled: true
+    priority: 5
+
+  # Example: System health check every hour
+  - name: "Hourly Health Check"
+    description: "Check system health every hour"
+    trigger:
+      type: interval
+      hours: 1
+    actions:
+      - plugin: system_control
+        command: get_system_info
+        params: {}
+    is_enabled: true
+    priority: 3
+
+  # Example: Keyword-triggered screenshot
+  - name: "Screenshot on Command"
+    description: "Take screenshot when keyword detected"
+    trigger:
+      type: keyword
+      keyword: "take screenshot"
+    actions:
+      - plugin: web_automation
+        command: screenshot
+        params:
+          output: "./screenshots/auto_{timestamp}.png"
+    is_enabled: false
+    priority: 7
+
+  # Example: Event-triggered action
+  - name: "On System Start"
+    description: "Actions to run when system starts"
+    trigger:
+      type: event
+      event: system_start
+    actions:
+      - plugin: system_control
+        command: get_system_info
+        params: {}
+    is_enabled: true
+    priority: 1
+
+  # Example: Morning briefing
+  - name: "Morning Briefing"
+    description: "Provide morning briefing at 8 AM"
+    trigger:
+      type: schedule
+      cron: "0 8 * * 1-5"  # 8 AM, Monday to Friday
+    actions:
+      - plugin: data_analysis
+        command: describe
+        params:
+          name: "daily_metrics"
+    is_enabled: false
+    priority: 5
+
+  # Example: Security scan
+  - name: "Weekly Security Scan"
+    description: "Run security scan every Sunday"
+    trigger:
+      type: schedule
+      cron: "0 2 * * 0"  # 2 AM every Sunday
+    actions:
+      - plugin: cyber_tools
+        command: port_scan
+        params:
+          host: "localhost"
+          ports: "1-1024"
+    is_enabled: false
+    priority: 8

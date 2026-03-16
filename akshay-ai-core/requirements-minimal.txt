@@ -1,0 +1,24 @@
+# Essential packages that are working
+typer
+rich
+openai
+anthropic
+google-generativeai
+sqlalchemy
+aiosqlite
+cryptography
+bcrypt
+pyjwt
+pyyaml
+psutil
+apscheduler
+prompt-toolkit
+loguru
+SpeechRecognition
+pyttsx3
+numpy
+opencv-python
+matplotlib
+pandas
+whois
+playwright

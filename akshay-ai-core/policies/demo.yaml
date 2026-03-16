@@ -1,0 +1,469 @@
+# ============================================================
+# AKSHAY AI CORE — Demo Mode Policy
+# ============================================================
+# Restricted policy for demonstration and testing.
+# Mock devices, no persistent changes, safe for sharing.
+# ============================================================
+
+version: "1.0"
+policy_id: "demo-default"
+name: "Demo Mode Policy"
+description: "Restricted policy for safe demonstrations"
+created_at: "2026-01-19T00:00:00Z"
+
+# ============================================================
+# DEMO MODE RESTRICTIONS
+# ============================================================
+# This policy enforces:
+# - No file system writes (outside demo sandbox)
+# - No system modifications
+# - No API key access
+# - No network requests (except mock)
+# - Mock devices only
+# - Session auto-reset on exit
+# ============================================================
+
+metadata:
+  mode: "demo"
+  author: "system"
+  revision: 1
+  tags:
+    - demo
+    - restricted
+    - safe
+
+# Trust Zones (restricted for demo)
+trust_zones:
+  demo_user:
+    description: "Demo mode user with restricted permissions"
+    level: 30
+  demo_guest:
+    description: "Demo mode guest with minimal permissions"
+    level: 10
+
+# Default to demo_user for all interfaces
+default_trust_zone: demo_user
+
+# Global Settings
+settings:
+  # All changes are temporary
+  persistent_storage: false
+  
+  # Use mock systems
+  mock_filesystem: true
+  mock_devices: true
+  mock_network: true
+  
+  # Visual indicator
+  show_demo_banner: true
+  
+  # Auto-reset on exit
+  auto_reset_on_exit: true
+  
+  # Session timeout (shorter for demo)
+  session_timeout_minutes: 30
+
+# ============================================================
+# RULES
+# ============================================================
+
+rules:
+  # ==========================================================
+  # BLOCKED OPERATIONS (DENY)
+  # ==========================================================
+  
+  - id: "demo-block-system-ops"
+    name: "Block System Operations"
+    description: "No system modifications in demo mode"
+    priority: 1000
+    enabled: true
+    match:
+      tools:
+        - "system.shutdown"
+        - "system.reboot"
+        - "system.config"
+        - "system.update"
+    action:
+      type: DENY
+      reason: "System operations are disabled in Demo Mode"
+    audit:
+      level: WARNING
+      log_request: true
+
+  - id: "demo-block-file-writes"
+    name: "Block File System Writes"
+    description: "No file writes outside demo sandbox"
+    priority: 999
+    enabled: true
+    match:
+      tools:
+        - "file.write"
+        - "file.delete"
+        - "file.move"
+        - "file.create"
+    conditions:
+      - field: "parameters.path"
+        operator: "not_starts_with"
+        value: "$DEMO_SANDBOX"
+    action:
+      type: DENY
+      reason: "File writes are disabled in Demo Mode. Use the demo sandbox."
+    audit:
+      level: WARNING
+      log_request: true
+
+  - id: "demo-block-api-keys"
+    name: "Block API Key Access"
+    description: "No access to real API keys in demo"
+    priority: 998
+    enabled: true
+    match:
+      tools:
+        - "vault.access"
+        - "vault.decrypt"
+        - "secrets.read"
+        - "config.api_keys"
+    action:
+      type: DENY
+      reason: "API key access is disabled in Demo Mode"
+    audit:
+      level: WARNING
+      log_request: true
+
+  - id: "demo-block-policy-change"
+    name: "Block Policy Changes"
+    description: "Cannot modify policies in demo mode"
+    priority: 997
+    enabled: true
+    match:
+      tools:
+        - "policy.update"
+        - "policy.delete"
+        - "policy.sign"
+    action:
+      type: DENY
+      reason: "Policy changes are disabled in Demo Mode"
+    audit:
+      level: WARNING
+      log_request: true
+
+  - id: "demo-block-user-admin"
+    name: "Block User Administration"
+    description: "Cannot manage users in demo mode"
+    priority: 996
+    enabled: true
+    match:
+      tools:
+        - "user.create"
+        - "user.delete"
+        - "user.modify"
+        - "admin.*"
+    action:
+      type: DENY
+      reason: "User administration is disabled in Demo Mode"
+    audit:
+      level: WARNING
+      log_request: true
+
+  - id: "demo-block-network"
+    name: "Block Real Network Requests"
+    description: "No real network access in demo"
+    priority: 995
+    enabled: true
+    match:
+      tools:
+        - "web.request"
+        - "web.scrape"
+        - "network.*"
+    conditions:
+      - field: "parameters.mock"
+        operator: "not_equals"
+        value: true
+    action:
+      type: DENY
+      reason: "Real network access is disabled in Demo Mode. Use mock endpoints."
+    audit:
+      level: INFO
+      log_request: true
+
+  - id: "demo-block-automation-create"
+    name: "Block Automation Creation"
+    description: "Cannot create persistent automations in demo"
+    priority: 994
+    enabled: true
+    match:
+      tools:
+        - "automation.create"
+        - "automation.schedule"
+    action:
+      type: DENY
+      reason: "Creating automations is disabled in Demo Mode"
+    audit:
+      level: INFO
+      log_request: true
+
+  # ==========================================================
+  # ALLOWED OPERATIONS (ALLOW)
+  # ==========================================================
+
+  - id: "demo-allow-read-ops"
+    name: "Allow Read Operations"
+    description: "Reading is always allowed"
+    priority: 100
+    enabled: true
+    match:
+      tools:
+        - "file.read"
+        - "file.list"
+        - "memory.read"
+        - "policy.status"
+        - "system.status"
+        - "audit.read"
+    action:
+      type: ALLOW
+    audit:
+      level: DEBUG
+
+  - id: "demo-allow-mock-devices"
+    name: "Allow Mock Device Control"
+    description: "Control mock IoT devices"
+    priority: 99
+    enabled: true
+    match:
+      tools:
+        - "iot.device_control"
+        - "iot.device_status"
+    conditions:
+      - field: "parameters.device_id"
+        operator: "starts_with"
+        value: "demo_"
+    action:
+      type: ALLOW
+      confirmation_required: false
+    audit:
+      level: INFO
+      log_request: true
+      log_response: true
+
+  - id: "demo-allow-mock-web"
+    name: "Allow Mock Web Requests"
+    description: "Access mock web endpoints"
+    priority: 98
+    enabled: true
+    match:
+      tools:
+        - "web.request"
+    conditions:
+      - field: "parameters.mock"
+        operator: "equals"
+        value: true
+    action:
+      type: ALLOW
+    audit:
+      level: INFO
+
+  - id: "demo-allow-memory-demo"
+    name: "Allow Demo Memory Operations"
+    description: "Memory operations in demo namespace"
+    priority: 97
+    enabled: true
+    match:
+      tools:
+        - "memory.write"
+        - "memory.delete"
+    conditions:
+      - field: "parameters.namespace"
+        operator: "equals"
+        value: "demo"
+    action:
+      type: ALLOW
+    audit:
+      level: INFO
+
+  - id: "demo-allow-sandbox-writes"
+    name: "Allow Demo Sandbox Writes"
+    description: "File writes in demo sandbox only"
+    priority: 96
+    enabled: true
+    match:
+      tools:
+        - "file.write"
+        - "file.create"
+    conditions:
+      - field: "parameters.path"
+        operator: "starts_with"
+        value: "$DEMO_SANDBOX"
+    action:
+      type: ALLOW
+    audit:
+      level: INFO
+      log_request: true
+
+  - id: "demo-allow-query"
+    name: "Allow AI Queries"
+    description: "AI queries are always allowed"
+    priority: 95
+    enabled: true
+    match:
+      tools:
+        - "brain.query"
+        - "brain.chat"
+    action:
+      type: ALLOW
+    audit:
+      level: DEBUG
+
+  # ==========================================================
+  # DEFAULT DENY
+  # ==========================================================
+
+  - id: "demo-default-deny"
+    name: "Default Deny"
+    description: "Deny anything not explicitly allowed"
+    priority: 0
+    enabled: true
+    match:
+      tools:
+        - "*"
+    action:
+      type: DENY
+      reason: "This operation is not available in Demo Mode"
+    audit:
+      level: INFO
+      log_request: true
+
+# ============================================================
+# RATE LIMITS (Relaxed for demo)
+# ============================================================
+
+rate_limits:
+  global:
+    requests_per_minute: 120
+    burst: 20
+  
+  per_tool:
+    "brain.query":
+      requests_per_minute: 30
+      burst: 5
+    "iot.device_control":
+      requests_per_minute: 60
+      burst: 10
+    "web.request":
+      requests_per_minute: 30
+      burst: 5
+
+# ============================================================
+# DEMO MOCK DEVICES
+# ============================================================
+
+mock_devices:
+  - id: "demo_light_living"
+    name: "Living Room Light"
+    type: "light"
+    capabilities:
+      - on_off
+      - brightness
+      - color
+    initial_state:
+      on: true
+      brightness: 80
+      color: "#FFFFFF"
+
+  - id: "demo_light_bedroom"
+    name: "Bedroom Light"
+    type: "light"
+    capabilities:
+      - on_off
+      - brightness
+    initial_state:
+      on: false
+      brightness: 50
+
+  - id: "demo_thermostat"
+    name: "Smart Thermostat"
+    type: "thermostat"
+    capabilities:
+      - temperature
+      - mode
+    initial_state:
+      temperature: 72
+      mode: "auto"
+      target: 70
+
+  - id: "demo_tv"
+    name: "Smart TV"
+    type: "tv"
+    capabilities:
+      - on_off
+      - volume
+      - input
+    initial_state:
+      on: false
+      volume: 30
+      input: "hdmi1"
+
+  - id: "demo_lock"
+    name: "Front Door Lock"
+    type: "lock"
+    capabilities:
+      - lock_unlock
+    initial_state:
+      locked: true
+
+# ============================================================
+# DEMO FILESYSTEM
+# ============================================================
+
+mock_filesystem:
+  base_path: "/home/demo"
+  structure:
+    Documents:
+      - name: "welcome.txt"
+        content: "Welcome to AKSHAY AI CORE Demo Mode!"
+      - name: "sample_data.csv"
+        content: "id,name,value\n1,Alpha,100\n2,Beta,200\n3,Gamma,300"
+    Pictures:
+      - name: "demo_image.png"
+        type: "placeholder"
+    Downloads: []
+    Projects:
+      demo_project:
+        - name: "README.md"
+          content: "# Demo Project\nThis is a demo project."
+        - name: "main.py"
+          content: "print('Hello from Demo!')"
+
+# ============================================================
+# DEMO WEB ENDPOINTS
+# ============================================================
+
+mock_web:
+  endpoints:
+    - url: "https://api.demo.local/weather"
+      method: "GET"
+      response:
+        status: 200
+        body:
+          location: "Demo City"
+          temperature: 72
+          condition: "Sunny"
+          humidity: 45
+
+    - url: "https://api.demo.local/news"
+      method: "GET"
+      response:
+        status: 200
+        body:
+          articles:
+            - title: "Demo News Article 1"
+              summary: "This is a demo news article."
+            - title: "Demo News Article 2"
+              summary: "Another demo news article."
+
+    - url: "https://api.demo.local/time"
+      method: "GET"
+      response:
+        status: 200
+        body:
+          timezone: "UTC"
+          time: "2026-01-19T12:00:00Z"

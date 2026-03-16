@@ -1,0 +1,253 @@
+﻿{
+    "Tests":  [
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: core",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: core/security",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: core/brain",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: api",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: policies",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: install",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "Directory: tests",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: ai.ps1",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: ai.bat",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: main.py",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: policies/default.yaml",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: policies/demo.yaml",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: core/security/keystore.py",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: core/security/bootstrap.py",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: core/security/engine.py",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Structure",
+                      "Name":  "File: core/security/wizard.py",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "FAIL",
+                      "Category":  "Python",
+                      "Name":  "Virtual environment exists",
+                      "Message":  "Run install.ps1 first"
+                  },
+                  {
+                      "Status":  "SKIP",
+                      "Category":  "Security",
+                      "Name":  "Security modules",
+                      "Message":  "Python not available"
+                  },
+                  {
+                      "Status":  "SKIP",
+                      "Category":  "Policy",
+                      "Name":  "Policy files",
+                      "Message":  "Python not available"
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: ai.ps1 exists",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: Function Write-Banner",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: Function Test-VenvExists",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: Function Get-PythonPath",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: Function Start-AkshayAI",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: Function Show-Help",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: -Demo flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: -Safe flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: -Recovery flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: -NoVoice flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: -Status flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: -Help flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Launcher",
+                      "Name":  "Launcher: ai.bat wrapper",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Uninstall",
+                      "Name":  "Uninstaller: uninstall.ps1 exists",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Uninstall",
+                      "Name":  "Uninstaller: PIN verification",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Uninstall",
+                      "Name":  "Uninstaller: Secure key wipe",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Uninstall",
+                      "Name":  "Uninstaller: Service stop",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Uninstall",
+                      "Name":  "Uninstaller: -Force flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "PASS",
+                      "Category":  "Uninstall",
+                      "Name":  "Uninstaller: -KeepUserData flag",
+                      "Message":  ""
+                  },
+                  {
+                      "Status":  "SKIP",
+                      "Category":  "Demo",
+                      "Name":  "Demo policy",
+                      "Message":  "Python not available"
+                  },
+                  {
+                      "Status":  "SKIP",
+                      "Category":  "Hardening",
+                      "Name":  "Security hardening",
+                      "Message":  "Python not available"
+                  },
+                  {
+                      "Status":  "SKIP",
+                      "Category":  "UnitTests",
+                      "Name":  "Python unit tests",
+                      "Message":  "-Quick mode"
+                  }
+              ],
+    "Skipped":  5,
+    "Failed":  1,
+    "Passed":  35
+}

@@ -1,0 +1,91 @@
+# ============================================================
+# AKSHAY AI CORE — Docker Compose Configuration
+# ============================================================
+
+version: '3.8'
+
+services:
+  # Main AKSHAY AI CORE application
+  akshay:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: akshay-ai-core
+    restart: unless-stopped
+    ports:
+      - "${HOST:-0.0.0.0}:${PORT:-8000}:8000"
+    environment:
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=sqlite:///./data/akshay.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./plugins/external:/app/plugins/external
+    depends_on:
+      - ollama
+    networks:
+      - akshay-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Ollama for local LLM inference
+  ollama:
+    image: ollama/ollama:latest
+    container_name: akshay-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - akshay-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ChromaDB for vector storage
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: akshay-chromadb
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    networks:
+      - akshay-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: akshay-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - akshay-network
+    command: redis-server --appendonly yes
+
+networks:
+  akshay-network:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  chroma-data:
+  redis-data:
