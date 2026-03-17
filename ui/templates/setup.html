@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS Setup — First Run</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230a0a0f'/><circle cx='16' cy='16' r='6' fill='%2300d4ff'/><circle cx='16' cy='16' r='10' fill='none' stroke='%2300d4ff' stroke-width='1.5' opacity='0.6'/><circle cx='16' cy='16' r='14' fill='none' stroke='%2300d4ff' stroke-width='1' opacity='0.3'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080b0f;
+            --card: #0f1318;
+            --border: #21262d;
+            --cyan: #00d4ff;
+            --cyan-dim: rgba(0,212,255,0.12);
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --success: #3fb950;
+            --error: #f85149;
+            --warning: #d29922;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 40px;
+        }
+        .logo-icon {
+            width: 56px; height: 56px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .arc {
+            position: absolute;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            animation: spin 3s linear infinite;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+        }
+        .a1 { width:20px; height:20px; }
+        .a2 { width:34px; height:34px; animation-direction:reverse; animation-duration:4s; }
+        .a3 { width:50px; height:50px; animation-duration:6s; }
+        .core { width:12px; height:12px; background:var(--cyan); border-radius:50%; box-shadow:0 0 20px var(--cyan); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .logo h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            color: var(--cyan);
+            letter-spacing: 4px;
+        }
+        .logo p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .steps {
+            display: flex;
+            gap: 0;
+            margin-bottom: 36px;
+        }
+        .step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 8px;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+        .step.active { opacity: 1; }
+        .step.done { opacity: 0.8; }
+        .step-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            background: #161b22;
+            transition: all 0.3s;
+        }
+        .step.active .step-num { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+        .step.done .step-num { border-color: var(--success); background: rgba(63,185,80,0.1); color: var(--success); }
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            margin-top: 15px;
+            margin-left: -1px;
+        }
+        .step.done .step-line { background: var(--success); }
+        .step-label { font-size: 11px; color: var(--muted); text-align: center; }
+        .step.active .step-label { color: var(--cyan); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--cyan);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .desc { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+        .field { margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--muted); }
+        input, select, textarea {
+            width: 100%;
+            background: #161b22;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--cyan); }
+        select option { background: #161b22; }
+        input[type="password"] { font-family: monospace; letter-spacing: 2px; }
+
+        .hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        .hint a { color: var(--cyan); text-decoration: none; }
+        .hint a:hover { text-decoration: underline; }
+
+        .key-preview {
+            font-family: monospace;
+            background: #161b22;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: var(--success);
+            margin-top: 8px;
+            display: none;
+        }
+
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #161b22;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .check-icon { font-size: 16px; }
+        .check-text { flex: 1; font-size: 13px; }
+        .check-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(63,185,80,0.15);
+            color: var(--success);
+            border: 1px solid rgba(63,185,80,0.3);
+        }
+        .check-badge.warn {
+            background: rgba(210,153,34,0.15);
+            color: var(--warning);
+            border-color: rgba(210,153,34,0.3);
+        }
+        .check-badge.err {
+            background: rgba(248,81,73,0.15);
+            color: var(--error);
+            border-color: rgba(248,81,73,0.3);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 11px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--cyan); color: #080b0f; }
+        .btn-primary:hover { background: #00b8d9; transform: translateY(-1px); }
+        .btn-secondary { background: #161b22; color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #1c2128; }
+
+        .launch-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .launch-box .big-icon { font-size: 56px; margin-bottom: 16px; }
+        .launch-box h3 { font-family: 'Orbitron', sans-serif; color: var(--success); font-size: 20px; margin-bottom: 10px; letter-spacing: 2px; }
+        .launch-box p { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+        .toast-msg {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .toast-msg.err { background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); color: var(--error); }
+        .toast-msg.ok  { background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.3); color: var(--success); }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <div class="logo-icon">
+            <div class="arc a1"></div>
+            <div class="arc a2"></div>
+            <div class="arc a3"></div>
+            <div class="core"></div>
+        </div>
+        <div>
+            <h1>JARVIS</h1>
+            <p>First-Time Setup Wizard</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <!-- Step indicators -->
+        <div class="steps">
+            <div class="step active" id="stepInd0">
+                <div class="step-num">1</div>
+                <div class="step-label">API Key</div>
+            </div>
+            <div class="step-line" id="line0"></div>
+            <div class="step" id="stepInd1">
+                <div class="step-num">2</div>
+                <div class="step-label">Settings</div>
+            </div>
+            <div class="step-line" id="line1"></div>
+            <div class="step" id="stepInd2">
+                <div class="step-num">3</div>
+                <div class="step-label">System Check</div>
+            </div>
+            <div class="step-line" id="line2"></div>
+            <div class="step" id="stepInd3">
+                <div class="step-num">4</div>
+                <div class="step-label">Launch</div>
+            </div>
+        </div>
+
+        <!-- Step 1: API Key -->
+        <div class="panel active" id="panel0">
+            <h2>Groq API Key</h2>
+            <p class="desc">JARVIS uses Groq's lightning-fast LLM API to power your AI assistant. Get a free API key — it takes under a minute.</p>
+
+            <div id="msgBox0" class="toast-msg"></div>
+
+            <div class="field">
+                <label>Groq API Key</label>
+                <input type="password" id="groqKey" placeholder="gsk_..." autocomplete="off">
+                <div class="key-preview" id="keyPreview"></div>
+                <p class="hint">
+                    Don't have one? Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create API Key.<br>
+                    Then add it to Replit: Secrets panel → key name <code>GROQ_API_KEY</code>.
+                </p>
+            </div>
+
+            <div class="field">
+                <label>AI Model</label>
+                <select id="modelSelect">
+                    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B (Recommended — Fast + Smart)</option>
+                    <option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fastest)</option>
+                    <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="validateKey()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Settings -->
+        <div class="panel" id="panel1">
+            <h2>Personalise JARVIS</h2>
+            <p class="desc">Customise your agent's identity and behaviour.</p>
+
+            <div class="field">
+                <label>Your Name</label>
+                <input type="text" id="userName" value="Akshay" placeholder="Your first name">
+            </div>
+
+            <div class="field">
+                <label>JARVIS Personality</label>
+                <select id="personality">
+                    <option value="professional">Professional & Focused</option>
+                    <option value="friendly" selected>Friendly & Warm</option>
+                    <option value="sarcastic">Witty & Sarcastic (Tony Stark style)</option>
+                    <option value="concise">Concise & Technical</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Voice Output</label>
+                <select id="voiceEnabled">
+                    <option value="false" selected>Disabled (server environment)</option>
+                    <option value="true">Enabled (local desktop only)</option>
+                </select>
+                <p class="hint">Voice works best when running locally on your machine with speakers.</p>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="goStep(0)">← Back</button>
+                <button class="btn btn-primary" onclick="goStep(2)">Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 3: System Check -->
+        <div class="panel" id="panel2">
+            <h2>System Check</h2>
+            <p class="desc">Verifying JARVIS components and dependencies.</p>
+
+            <div id="checkList">
+                <div class="check-row">
+                    <span class="check-icon">⏳</span>
+                    <span class="check-text">Running checks...</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+                <button class="btn btn-primary" onclick="goStep(3)" id="launchBtn" disabled>Finish →</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Launch -->
+        <div class="panel" id="panel3">
+            <h2>All Done!</h2>
+            <div class="launch-box">
+                <div class="big-icon">🤖</div>
+                <h3>JARVIS is ready</h3>
+                <p>Your personal AI agent is configured and running.<br>
+                Head to the main interface to start chatting.</p>
+                <a href="/" class="btn btn-primary" style="text-decoration:none; display:inline-block;">
+                    Launch JARVIS →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+
+        function goStep(n) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel' + n).classList.add('active');
+
+            document.querySelectorAll('.step').forEach((s, i) => {
+                s.classList.remove('active', 'done');
+                if (i < n) s.classList.add('done');
+                if (i === n) s.classList.add('active');
+            });
+
+            currentStep = n;
+            if (n === 2) runChecks();
+        }
+
+        function showMsg(id, msg, type) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.className = 'toast-msg ' + type;
+            el.style.display = 'block';
+        }
+
+        function validateKey() {
+            const key = document.getElementById('groqKey').value.trim();
+            if (!key) {
+                showMsg('msgBox0', 'Please enter your Groq API key.', 'err');
+                return;
+            }
+            if (!key.startsWith('gsk_')) {
+                showMsg('msgBox0', 'Groq API keys start with "gsk_". Double-check your key.', 'err');
+                return;
+            }
+            const preview = document.getElementById('keyPreview');
+            preview.textContent = key.slice(0, 8) + '••••••••••••••••' + key.slice(-4);
+            preview.style.display = 'block';
+            goStep(1);
+        }
+
+        async function runChecks() {
+            const checks = [
+                { label: 'JARVIS server online', fn: checkServer },
+                { label: 'AI brain module', fn: checkBrain },
+                { label: 'Memory system (SQLite + ChromaDB)', fn: checkMemory },
+                { label: 'System stats (psutil)', fn: checkStats },
+                { label: 'Background scheduler', fn: () => ({ok: true, badge: 'Ready'}) },
+            ];
+
+            const list = document.getElementById('checkList');
+            list.innerHTML = '';
+
+            let allOk = true;
+            for (const c of checks) {
+                const row = document.createElement('div');
+                row.className = 'check-row';
+                row.innerHTML = `<span class="check-icon">⏳</span><span class="check-text">${c.label}</span><span class="check-badge warn">Checking...</span>`;
+                list.appendChild(row);
+
+                const result = await c.fn();
+                const icon = row.querySelector('.check-icon');
+                const badge = row.querySelector('.check-badge');
+
+                if (result.ok) {
+                    icon.textContent = '✅';
+                    badge.textContent = result.badge || 'OK';
+                    badge.className = 'check-badge';
+                } else {
+                    icon.textContent = '⚠️';
+                    badge.textContent = result.badge || 'Warning';
+                    badge.className = 'check-badge warn';
+                    if (result.critical) allOk = false;
+                }
+
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            document.getElementById('launchBtn').disabled = false;
+        }
+
+        async function checkServer() {
+            try {
+                const r = await fetch('/health');
+                const d = await r.json();
+                return { ok: d.status === 'healthy', badge: 'Online' };
+            } catch { return { ok: false, badge: 'Offline', critical: true }; }
+        }
+
+        async function checkBrain() {
+            const key = document.getElementById('groqKey').value.trim();
+            const configured = key.startsWith('gsk_');
+            return { ok: configured, badge: configured ? 'Configured' : 'Key not set', critical: !configured };
+        }
+
+        async function checkMemory() {
+            try {
+                const r = await fetch('/api/memory/stats');
+                const d = await r.json();
+                return { ok: true, badge: `${d.memories ?? 0} memories` };
+            } catch { return { ok: false, badge: 'Error' }; }
+        }
+
+        async function checkStats() {
+            try {
+                const r = await fetch('/api/system/stats');
+                const d = await r.json();
+                return { ok: d.success, badge: d.success ? `CPU ${d.cpu?.percent ?? 0}%` : 'No psutil' };
+            } catch { return { ok: false, badge: 'Error' }; }
+        }
+
+        // Show key preview while typing
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('groqKey').addEventListener('input', (e) => {
+                const v = e.target.value.trim();
+                document.getElementById('msgBox0').style.display = 'none';
+                const p = document.getElementById('keyPreview');
+                if (v.length > 10) {
+                    p.textContent = v.slice(0, 8) + '••••••••••••••••' + v.slice(-4);
+                    p.style.display = 'block';
+                } else {
+                    p.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

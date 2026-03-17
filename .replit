@@ -4,7 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["espeak-ng", "freetype", "gitFull", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "playwright-driver", "scrot", "tcl", "tesseract", "tk", "xvfb-run", "zlib"]
+packages = ["espeak-ng", "freetype", "gitFull", "iana-etc", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "playwright-driver", "scrot", "tcl", "tesseract", "tk", "xvfb-run", "zlib"]
 
 [workflows]
 runButton = "Project"
@@ -22,17 +22,17 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python main.py"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn -c gunicorn.conf.py wsgi:application"
+waitForPort = 5000
+
 [deployment]
 deploymentTarget = "vm"
-run = ["python", "main.py"]
+run = ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:application"]
 
 [[ports]]
 localPort = 5000

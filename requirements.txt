@@ -1,77 +1,43 @@
-# JARVIS Requirements
-# Personal AI Desktop Agent for Akshay
-# Complete build with all 10 additional features
+# JARVIS v2.0 — Production Requirements
+# Just A Rather Very Intelligent System — Built for Akshay
 
-# ==================== CORE ====================
+# ── Core AI ───────────────────────────────
 groq>=0.4.0
 
-# ==================== VOICE ====================
+# ── Web Framework + Realtime ──────────────
+flask>=3.0.0
+flask-socketio>=5.3.6
+python-socketio>=5.9.0
+
+# ── Production WSGI ───────────────────────
+gunicorn>=21.2.0
+eventlet>=0.33.0
+
+# ── System Monitoring ─────────────────────
+psutil>=5.9.0
+
+# ── Memory / Vector Search ────────────────
+chromadb>=0.4.22
+
+# ── HTTP / Web Scraping ───────────────────
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# ── Voice ─────────────────────────────────
 pyttsx3>=2.90
 SpeechRecognition>=3.10.0
 
-# ==================== PC AUTOMATION ====================
-pyautogui>=0.9.54
-pynput>=1.7.6
-psutil>=5.9.6
+# ── Scheduling ────────────────────────────
+APScheduler>=3.10.0
+
+# ── Config / Utils ────────────────────────
+python-dotenv>=1.0.0
 pyperclip>=1.8.2
 
-# ==================== BROWSER ====================
-requests>=2.31.0
-beautifulsoup4>=4.12.2
-playwright>=1.40.0
+# ── Automation (graceful degradation without display) ──
+pyautogui>=0.9.54
+pynput>=1.7.6
 
-# ==================== MEMORY ====================
-chromadb>=0.4.22
-sentence-transformers>=2.2.2
-
-# ==================== MEDIA & OCR ====================
-yt-dlp>=2023.12.30
-Pillow>=10.1.0
-pytesseract>=0.3.10
-
-# ==================== PDF & DOCUMENTS ====================
-PyMuPDF>=1.23.0
-
-# ==================== SCHEDULING ====================
-APScheduler>=3.10.4
-schedule>=1.2.0
-
-# ==================== WEB FRAMEWORK ====================
-flask>=3.0.0
-flask-socketio>=5.3.6
-uvicorn>=0.25.0
-
-# ==================== UTILS ====================
-python-dotenv>=1.0.0
-
-# ==================== GIT ====================
+# ── Data / Files ──────────────────────────
+Pillow>=10.0.0
 GitPython>=3.1.40
-
-# ==================== GPU MONITORING ====================
-GPUtil>=1.4.0
-
-# ==================== OPTIONAL ====================
-# For full WhatsApp integration:
-# whatsapp-web.js (requires Node.js)
-
-# For Sarvam AI Kannada voice:
-# requests (already included)
-
-# Note: Tesseract OCR requires separate installation
-# Download from: https://github.com/UB-Mannheim/tesseract/wiki
-APScheduler
-beautifulsoup4
-flask
-flask-socketio
-GitPython
-groq
-Pillow
-psutil
-pyperclip
-python-dotenv
-requests
-schedule
-flask
-flask-socketio
-groq
-python-dotenv
