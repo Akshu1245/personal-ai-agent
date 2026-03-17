@@ -29,6 +29,7 @@ SpeechRecognition>=3.10.0
 
 # ── Scheduling ────────────────────────────
 APScheduler>=3.10.0
+schedule>=1.2.0
 
 # ── Config / Utils ────────────────────────
 python-dotenv>=1.0.0

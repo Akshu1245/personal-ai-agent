@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -30,8 +31,11 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192x192.png">
 
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- PWA Install Banner -->
     <div id="pwaInstallBanner" class="pwa-banner hidden">
@@ -81,12 +85,16 @@
                     <span class="status-dot" id="statusDot"></span>
                     <span id="statusText">Connecting...</span>
                 </div>
-                <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="openProfileModal()" title="Edit profile">U</button>
                 <button class="icon-btn pwa-header-btn hidden" id="pwaHeaderBtn" title="Install JARVIS as desktop app">
-                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+                    </svg>
                 </button>
                 <button class="icon-btn" onclick="clearChat()" title="Clear chat">
-                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12z"/></svg>
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor"
+                            d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12z" />
+                    </svg>
                 </button>
             </div>
         </header>
@@ -119,26 +127,33 @@
 
             <!-- Suggested prompts -->
             <div class="suggestions" id="suggestions">
-                <button class="suggestion-chip" onclick="sendSuggestion('What are my active projects?')">📁 Active projects</button>
-                <button class="suggestion-chip" onclick="sendSuggestion('What is the Cardano price?')">₿ Cardano price</button>
-                <button class="suggestion-chip" onclick="sendSuggestion('Give me a quick productivity tip')">💡 Productivity tip</button>
-                <button class="suggestion-chip" onclick="sendSuggestion('Search the web for latest AI news')">🔍 AI news</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('What are my active projects?')">📁 Active
+                    projects</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('What is the Cardano price?')">₿ Cardano
+                    price</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Give me a quick productivity tip')">💡
+                    Productivity tip</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Search the web for latest AI news')">🔍 AI
+                    news</button>
             </div>
 
             <!-- Input Area -->
             <div class="input-area">
                 <button class="voice-btn" id="voiceBtn" title="Hold to speak">
                     <svg viewBox="0 0 24 24" width="20" height="20">
-                        <path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/>
-                        <path fill="currentColor" d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                        <path fill="currentColor"
+                            d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z" />
+                        <path fill="currentColor"
+                            d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
                     </svg>
                 </button>
                 <div class="input-wrapper">
-                    <textarea id="messageInput" placeholder="Ask JARVIS anything..." rows="1" autocomplete="off"></textarea>
+                    <textarea id="messageInput" placeholder="Ask JARVIS anything..." rows="1"
+                        autocomplete="off"></textarea>
                 </div>
                 <button class="send-btn" id="sendBtn">
                     <svg viewBox="0 0 24 24" width="20" height="20">
-                        <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>
                 </button>
             </div>
@@ -162,26 +177,40 @@
                     <h3>System Status</h3>
                     <div class="stat-row">
                         <div class="stat-label">
-                            <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+                            <svg viewBox="0 0 24 24" width="14" height="14">
+                                <path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+                            </svg>
                             CPU
                         </div>
-                        <div class="stat-bar"><div class="stat-fill" id="cpuBar" style="width:0%"></div></div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="cpuBar" style="width:0%"></div>
+                        </div>
                         <span class="stat-val" id="cpuVal">0%</span>
                     </div>
                     <div class="stat-row">
                         <div class="stat-label">
-                            <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M17 17H7V7h10m0-2H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>
+                            <svg viewBox="0 0 24 24" width="14" height="14">
+                                <path fill="currentColor"
+                                    d="M17 17H7V7h10m0-2H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z" />
+                            </svg>
                             RAM
                         </div>
-                        <div class="stat-bar"><div class="stat-fill" id="ramBar" style="width:0%"></div></div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="ramBar" style="width:0%"></div>
+                        </div>
                         <span class="stat-val" id="ramVal">0%</span>
                     </div>
                     <div class="stat-row">
                         <div class="stat-label">
-                            <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
+                            <svg viewBox="0 0 24 24" width="14" height="14">
+                                <path fill="currentColor"
+                                    d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z" />
+                            </svg>
                             Disk
                         </div>
-                        <div class="stat-bar"><div class="stat-fill" id="diskBar" style="width:0%"></div></div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="diskBar" style="width:0%"></div>
+                        </div>
                         <span class="stat-val" id="diskVal">0%</span>
                     </div>
                     <div class="stat-detail" id="memDetail"></div>
@@ -224,12 +253,15 @@
                     <div class="section-header">
                         <h3>Brain</h3>
                         <div class="mem-header-btns">
-                            <button class="mem-action-btn" onclick="openTeachModal()" title="Teach JARVIS something">+ Teach</button>
-                            <button class="mem-action-btn import-btn" onclick="openImportModal()" title="Import from AI">↑ Import</button>
+                            <button class="mem-action-btn" onclick="openTeachModal()" title="Teach JARVIS something">+
+                                Teach</button>
+                            <button class="mem-action-btn import-btn" onclick="openImportModal()"
+                                title="Import from AI">↑ Import</button>
                         </div>
                     </div>
                     <div class="mem-search-row">
-                        <input type="text" id="memSearchInput" placeholder="Search memories..." class="form-input mem-search" oninput="debounceMemSearch()">
+                        <input type="text" id="memSearchInput" placeholder="Search memories..."
+                            class="form-input mem-search" oninput="debounceMemSearch()">
                     </div>
                     <div class="mem-source-filter" id="memSourceFilter"></div>
                     <div class="memory-list" id="memoryList">
@@ -282,14 +314,17 @@
                         <h3>&#x1F916; Computer Use Agent</h3>
                         <span class="cu-badge" id="cuStatusBadge">Idle</span>
                     </div>
-                    <p class="cu-description">Tell JARVIS what to do on your screen. It will see your desktop and take action — just like UI-TARS.</p>
+                    <p class="cu-description">Tell JARVIS what to do on your screen. It will see your desktop and take
+                        action — just like UI-TARS.</p>
 
                     <div class="cu-availability" id="cuAvailability">
                         <div class="cu-avail-checking">Checking environment...</div>
                     </div>
 
                     <div class="cu-task-form" id="cuTaskForm">
-                        <textarea id="cuTaskInput" class="cu-task-input" placeholder="e.g. Open VS Code and create a new Python file called hello.py&#10;e.g. Search for 'Python tutorials' on Google&#10;e.g. Open Spotify and play something chill" rows="4"></textarea>
+                        <textarea id="cuTaskInput" class="cu-task-input"
+                            placeholder="e.g. Open VS Code and create a new Python file called hello.py&#10;e.g. Search for 'Python tutorials' on Google&#10;e.g. Open Spotify and play something chill"
+                            rows="4"></textarea>
                         <div class="cu-options">
                             <label class="cu-option-label">Max steps:</label>
                             <select id="cuMaxSteps" class="cu-select">
@@ -344,16 +379,22 @@
                 <button class="modal-close" onclick="closeModal('importModal')">✕</button>
             </div>
             <div class="modal-body">
-                <p class="modal-desc">Import your conversation history from any AI assistant. JARVIS will learn from your past conversations.</p>
+                <p class="modal-desc">Import your conversation history from any AI assistant. JARVIS will learn from
+                    your past conversations.</p>
                 <div class="import-source-btns">
-                    <button class="source-btn active" data-source="auto" onclick="selectSource(this,'auto')">Auto-detect</button>
-                    <button class="source-btn" data-source="chatgpt" onclick="selectSource(this,'chatgpt')">ChatGPT</button>
-                    <button class="source-btn" data-source="claude" onclick="selectSource(this,'claude')">Claude</button>
-                    <button class="source-btn" data-source="gemini" onclick="selectSource(this,'gemini')">Gemini</button>
+                    <button class="source-btn active" data-source="auto"
+                        onclick="selectSource(this,'auto')">Auto-detect</button>
+                    <button class="source-btn" data-source="chatgpt"
+                        onclick="selectSource(this,'chatgpt')">ChatGPT</button>
+                    <button class="source-btn" data-source="claude"
+                        onclick="selectSource(this,'claude')">Claude</button>
+                    <button class="source-btn" data-source="gemini"
+                        onclick="selectSource(this,'gemini')">Gemini</button>
                     <button class="source-btn" data-source="text" onclick="selectSource(this,'text')">Text / MD</button>
                 </div>
                 <div class="import-how" id="importHowTo">
-                    <strong>How to export from ChatGPT:</strong> Settings → Data Controls → Export Data → Download → upload <code>conversations.json</code><br>
+                    <strong>How to export from ChatGPT:</strong> Settings → Data Controls → Export Data → Download →
+                    upload <code>conversations.json</code><br>
                     <strong>Claude:</strong> Settings → Export Data → upload the JSON file<br>
                     <strong>Any AI:</strong> Paste raw conversation text or upload a .txt / .md file
                 </div>
@@ -363,13 +404,15 @@
                     <div class="drop-sub">Supports .json, .txt, .md — up to 16 MB</div>
                     <div class="drop-filename hidden" id="dropFilename"></div>
                 </div>
-                <input type="file" id="importFile" accept=".json,.txt,.md,.csv" style="display:none" onchange="handleImportFile(this)">
+                <input type="file" id="importFile" accept=".json,.txt,.md,.csv" style="display:none"
+                    onchange="handleImportFile(this)">
                 <div class="import-preview hidden" id="importPreview">
                     <div class="preview-count" id="previewCount"></div>
                     <div class="preview-samples" id="previewSamples"></div>
                 </div>
                 <div class="import-or">— or paste text directly —</div>
-                <textarea id="importPasteArea" class="form-input" rows="4" placeholder="Paste any conversation, notes, or context here..."></textarea>
+                <textarea id="importPasteArea" class="form-input" rows="4"
+                    placeholder="Paste any conversation, notes, or context here..."></textarea>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn secondary" onclick="closeModal('importModal')">Cancel</button>
@@ -386,7 +429,8 @@
                 <button class="modal-close" onclick="closeModal('teachModal')">✕</button>
             </div>
             <div class="modal-body">
-                <p class="modal-desc">Tell JARVIS something you want it to always remember — a fact, preference, context, or ongoing goal.</p>
+                <p class="modal-desc">Tell JARVIS something you want it to always remember — a fact, preference,
+                    context, or ongoing goal.</p>
                 <textarea id="teachContent" class="form-input" rows="5"
                     placeholder="e.g. My main project is VORAX — an AI video SaaS. I prefer concise answers. I'm building with FastAPI + React..."></textarea>
                 <div class="form-row">
@@ -457,7 +501,8 @@
                     </div>
                     <div class="form-group full">
                         <label>Goals / Context</label>
-                        <textarea id="projGoals" class="form-input" rows="3" placeholder="What are you trying to build? Any important context JARVIS should know..."></textarea>
+                        <textarea id="projGoals" class="form-input" rows="3"
+                            placeholder="What are you trying to build? Any important context JARVIS should know..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Project URL</label>
@@ -476,38 +521,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
-    <div class="modal-overlay hidden" id="profileModal">
-        <div class="modal modal-sm">
-            <div class="modal-header">
-                <h2>Your Profile</h2>
-                <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="profile-avatar-preview">
-                    <div class="profile-avatar" id="profileAvatarPreview">U</div>
-                </div>
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="profileName" class="form-input" placeholder="Enter your name">
-                </div>
-                <div class="form-group">
-                    <label>AI Model</label>
-                    <select id="profileModel" class="form-input">
-                        <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Default)</option>
-                        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-                        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-                        <option value="gemma2-9b-it">Gemma 2 9B</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn secondary" onclick="closeModal('profileModal')">Cancel</button>
-                <button class="modal-btn primary" onclick="submitProfile()">Save Profile</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Toast container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -517,63 +530,64 @@
 
     <!-- Service Worker + PWA Install Prompt -->
     <script>
-    (function() {
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .catch(() => {});
-            });
-        }
-
-        // Capture install prompt
-        let deferredPrompt = null;
-        const banner      = document.getElementById('pwaInstallBanner');
-        const installBtn  = document.getElementById('pwaInstallBtn');
-        const dismissBtn  = document.getElementById('pwaDismissBtn');
-        const headerBtn   = document.getElementById('pwaHeaderBtn');
-
-        const dismissed = localStorage.getItem('jarvis-pwa-dismissed');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Show banner unless user previously dismissed
-            if (!dismissed) {
-                banner.classList.remove('hidden');
+        (function () {
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                        .catch(() => { });
+                });
             }
-            // Always show header icon
-            if (headerBtn) headerBtn.classList.remove('hidden');
-        });
 
-        function triggerInstall() {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((result) => {
-                if (result.outcome === 'accepted') {
-                    banner.classList.add('hidden');
-                    if (headerBtn) headerBtn.classList.add('hidden');
-                    if (typeof showToast === 'function') {
-                        showToast('JARVIS installed as desktop app!', 'success');
-                    }
+            // Capture install prompt
+            let deferredPrompt = null;
+            const banner = document.getElementById('pwaInstallBanner');
+            const installBtn = document.getElementById('pwaInstallBtn');
+            const dismissBtn = document.getElementById('pwaDismissBtn');
+            const headerBtn = document.getElementById('pwaHeaderBtn');
+
+            const dismissed = localStorage.getItem('jarvis-pwa-dismissed');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Show banner unless user previously dismissed
+                if (!dismissed) {
+                    banner.classList.remove('hidden');
                 }
-                deferredPrompt = null;
+                // Always show header icon
+                if (headerBtn) headerBtn.classList.remove('hidden');
             });
-        }
 
-        if (installBtn)  installBtn.addEventListener('click', triggerInstall);
-        if (headerBtn)   headerBtn.addEventListener('click', triggerInstall);
-        if (dismissBtn)  dismissBtn.addEventListener('click', () => {
-            banner.classList.add('hidden');
-            localStorage.setItem('jarvis-pwa-dismissed', '1');
-        });
+            function triggerInstall() {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        banner.classList.add('hidden');
+                        if (headerBtn) headerBtn.classList.add('hidden');
+                        if (typeof showToast === 'function') {
+                            showToast('JARVIS installed as desktop app!', 'success');
+                        }
+                    }
+                    deferredPrompt = null;
+                });
+            }
 
-        // Hide install UI once already installed
-        window.addEventListener('appinstalled', () => {
-            banner.classList.add('hidden');
-            if (headerBtn) headerBtn.classList.add('hidden');
-        });
-    })();
+            if (installBtn) installBtn.addEventListener('click', triggerInstall);
+            if (headerBtn) headerBtn.addEventListener('click', triggerInstall);
+            if (dismissBtn) dismissBtn.addEventListener('click', () => {
+                banner.classList.add('hidden');
+                localStorage.setItem('jarvis-pwa-dismissed', '1');
+            });
+
+            // Hide install UI once already installed
+            window.addEventListener('appinstalled', () => {
+                banner.classList.add('hidden');
+                if (headerBtn) headerBtn.classList.add('hidden');
+            });
+        })();
     </script>
 </body>
+
 </html>

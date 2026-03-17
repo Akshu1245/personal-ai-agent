@@ -45,7 +45,8 @@ class Memory:
             self._init_chroma()
 
     def _init_sqlite(self):
-        conn = sqlite3.connect(str(self.db_path))
+        # Add timeout to prevent database lock issues
+        conn = sqlite3.connect(str(self.db_path), timeout=30.0)
         c = conn.cursor()
 
         c.executescript('''
@@ -147,7 +148,7 @@ class Memory:
         self._init_storage()
 
     def _conn(self):
-        return sqlite3.connect(str(self.db_path))
+        return sqlite3.connect(str(self.db_path), timeout=30.0)
 
     # ═══════════════════════════════════════
     #  USER PROFILE

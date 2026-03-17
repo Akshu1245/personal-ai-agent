@@ -1,29 +1,29 @@
 // JARVIS UI v2.0
 
 // ── State ─────────────────────────────────
-let socket        = null;
-let isListening   = false;
-let isSending     = false;
-let messageCount  = 0;
-let userProfile   = { name: 'User', avatar_initial: 'U' };
-let memOffset     = 0;
+let socket = null;
+let isListening = false;
+let isSending = false;
+let messageCount = 0;
+let userProfile = { name: 'User', avatar_initial: 'U' };
+let memOffset = 0;
 let memActiveSource = null;
-let memSearchTimer  = null;
+let memSearchTimer = null;
 let importSelectedSource = 'auto';
 let importFileContent = null;
-let importFileName    = '';
-let editingProjectId  = null;
+let importFileName = '';
+let editingProjectId = null;
 
 // ── DOM refs ──────────────────────────────
-const messagesEl    = document.getElementById('messages');
-const messageInput  = document.getElementById('messageInput');
-const sendBtn       = document.getElementById('sendBtn');
-const voiceBtn      = document.getElementById('voiceBtn');
-const statusDot     = document.getElementById('statusDot');
-const statusText    = document.getElementById('statusText');
-const typingInd     = document.getElementById('typingIndicator');
+const messagesEl = document.getElementById('messages');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const voiceBtn = document.getElementById('voiceBtn');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const typingInd = document.getElementById('typingIndicator');
 const suggestionsEl = document.getElementById('suggestions');
-const projectBadge  = document.getElementById('currentProjectName');
+const projectBadge = document.getElementById('currentProjectName');
 
 // ── Init ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupVoice();
     setupDropZone();
     checkApiStatus();
-    loadProfile();
     loadStats();
     loadMemoryStats();
     loadTasks();
@@ -46,83 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Socket.IO ─────────────────────────────
 function initSocketIO() {
     socket = io({ transports: ['polling', 'websocket'], reconnectionDelay: 2000 });
-    socket.on('connect',        () => setStatus('online', 'Online'));
-    socket.on('disconnect',     () => setStatus('', 'Offline'));
-    socket.on('connect_error',  () => setStatus('', 'Connecting...'));
-    socket.on('jarvis_status',  (d) => { if (d.status === 'online') setStatus('online', 'Online'); });
-    socket.on('jarvis_thinking',(d) => setThinking(d.thinking));
-    socket.on('jarvis_response',(d) => { if (d.text) addMessage('bot', d.text); });
-    socket.on('project_switched',(d) => {
+    socket.on('connect', () => setStatus('online', 'Online'));
+    socket.on('disconnect', () => setStatus('', 'Offline'));
+    socket.on('connect_error', () => setStatus('', 'Connecting...'));
+    socket.on('jarvis_status', (d) => { if (d.status === 'online') setStatus('online', 'Online'); });
+    socket.on('jarvis_thinking', (d) => setThinking(d.thinking));
+    socket.on('jarvis_response', (d) => { if (d.text) addMessage('bot', d.text); });
+    socket.on('project_switched', (d) => {
         projectBadge.textContent = d.project;
         showToast(`Switched to ${d.project}`, 'info');
     });
 
-    socket.on('cu_started',    (d) => cuOnStarted(d));
+    socket.on('cu_started', (d) => cuOnStarted(d));
     socket.on('cu_screenshot', (d) => cuOnScreenshot(d));
-    socket.on('cu_step',       (d) => cuOnStep(d));
-    socket.on('cu_finished',   (d) => cuOnFinished(d));
+    socket.on('cu_step', (d) => cuOnStep(d));
+    socket.on('cu_finished', (d) => cuOnFinished(d));
 }
 
 function setStatus(cls, label) {
     statusDot.className = 'status-dot' + (cls ? ' ' + cls : '');
     statusText.textContent = label;
-}
-
-// ── Profile ───────────────────────────────
-async function loadProfile() {
-    try {
-        const r = await fetch('/api/profile');
-        userProfile = await r.json();
-        applyProfile();
-    } catch (e) {}
-}
-
-function applyProfile() {
-    const initial = (userProfile.name || 'U')[0].toUpperCase();
-    userProfile.avatar_initial = initial;
-    const btn = document.getElementById('profileAvatarBtn');
-    if (btn) btn.textContent = initial;
-    // Update welcome message to use name
-    const welcome = document.getElementById('welcomeMsg');
-    if (welcome) {
-        const p = welcome.querySelector('p');
-        if (p && p.textContent.includes('Akshay')) {
-            p.textContent = `Good to have you back, ${userProfile.name}. I'm online and fully operational.`;
-        }
-    }
-}
-
-function openProfileModal() {
-    document.getElementById('profileName').value = userProfile.name || '';
-    const modelSel = document.getElementById('profileModel');
-    if (modelSel) modelSel.value = userProfile.groq_model || 'llama-3.3-70b-versatile';
-    const preview = document.getElementById('profileAvatarPreview');
-    if (preview) preview.textContent = (userProfile.name || 'U')[0].toUpperCase();
-    document.getElementById('profileName').addEventListener('input', function() {
-        const v = this.value.trim();
-        if (preview) preview.textContent = (v || 'U')[0].toUpperCase();
-    }, { once: false });
-    openModal('profileModal');
-}
-
-async function submitProfile() {
-    const name  = document.getElementById('profileName').value.trim();
-    const model = document.getElementById('profileModel').value;
-    if (!name) { showToast('Name required', 'error'); return; }
-    try {
-        const r = await fetch('/api/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, groq_model: model })
-        });
-        const d = await r.json();
-        if (d.success) {
-            userProfile = d.profile;
-            applyProfile();
-            closeModal('profileModal');
-            showToast('Profile saved', 'success');
-        }
-    } catch (e) { showToast('Save failed', 'error'); }
 }
 
 // ── API Key Check ─────────────────────────
@@ -133,7 +75,7 @@ async function checkApiStatus() {
         const warning = document.getElementById('apiWarning');
         if (!d.groq_configured) warning.classList.remove('hidden');
         if (d.project) projectBadge.textContent = d.project;
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // ── Input Setup ───────────────────────────
@@ -247,7 +189,7 @@ function setThinking(on) {
 
 // ── Clear chat ────────────────────────────
 async function clearChat() {
-    try { await fetch('/api/chat/clear', { method: 'POST' }); } catch (e) {}
+    try { await fetch('/api/chat/clear', { method: 'POST' }); } catch (e) { }
     const msgs = messagesEl.querySelectorAll('.message:not(#welcomeMsg)');
     msgs.forEach(m => m.remove());
     suggestionsEl.style.display = '';
@@ -260,7 +202,7 @@ function setupVoice() {
     voiceBtn.addEventListener('mouseup', stopVoice);
     voiceBtn.addEventListener('mouseleave', stopVoice);
     voiceBtn.addEventListener('touchstart', e => { e.preventDefault(); startVoice(); });
-    voiceBtn.addEventListener('touchend',   e => { e.preventDefault(); stopVoice(); });
+    voiceBtn.addEventListener('touchend', e => { e.preventDefault(); stopVoice(); });
 }
 function startVoice() {
     if (!socket?.connected) return;
@@ -281,8 +223,8 @@ function quickAction(action) {
     let msg = '';
     switch (action) {
         case 'screenshot': msg = 'Take a screenshot'; break;
-        case 'focus':      msg = 'Start focus mode for 30 minutes'; break;
-        case 'crypto':     msg = 'What is the current Cardano (ADA) price?'; break;
+        case 'focus': msg = 'Start focus mode for 30 minutes'; break;
+        case 'crypto': msg = 'What is the current Cardano (ADA) price?'; break;
         case 'search':
             const q = prompt('Search for:');
             if (!q) return;
@@ -304,7 +246,7 @@ async function loadStats() {
         setBar('diskBar', 'diskVal', d.disk.percent);
         document.getElementById('memDetail').textContent =
             `${d.memory.used_gb}GB / ${d.memory.total_gb}GB RAM  ·  ${d.disk.used_gb}GB / ${d.disk.total_gb}GB disk`;
-    } catch (e) {}
+    } catch (e) { }
 }
 function setBar(barId, valId, pct) {
     const bar = document.getElementById(barId);
@@ -320,11 +262,11 @@ async function loadMemoryStats() {
     try {
         const r = await fetch('/api/memory/stats');
         const d = await r.json();
-        document.getElementById('convCount').textContent  = d.conversations ?? '—';
-        document.getElementById('memCount').textContent   = d.memories ?? '—';
-        document.getElementById('taskCount').textContent  = d.pending_tasks ?? '—';
+        document.getElementById('convCount').textContent = d.conversations ?? '—';
+        document.getElementById('memCount').textContent = d.memories ?? '—';
+        document.getElementById('taskCount').textContent = d.pending_tasks ?? '—';
         document.getElementById('notesCount').textContent = d.notes ?? '—';
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // ── Projects Tab ──────────────────────────
@@ -376,7 +318,7 @@ async function loadProjectsTab() {
                 sysProjects.appendChild(el);
             });
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 async function loadProjects() {
@@ -391,7 +333,7 @@ async function switchProject(name) {
             el.classList.toggle('active', el.querySelector('span').textContent === name);
         });
         showToast(`Context → ${name}`, 'success');
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function openProjectModal(id = null) {
@@ -399,11 +341,11 @@ function openProjectModal(id = null) {
     document.getElementById('projectModalTitle').textContent = id ? 'Edit Project' : 'New Project';
     document.getElementById('editProjectId').value = id || '';
     if (!id) {
-        ['projName','projDesc','projStack','projTech','projGoals','projUrl','projPath'].forEach(f => {
+        ['projName', 'projDesc', 'projStack', 'projTech', 'projGoals', 'projUrl', 'projPath'].forEach(f => {
             const el = document.getElementById(f);
             if (el) el.value = '';
         });
-        document.getElementById('projStatus').value   = 'active';
+        document.getElementById('projStatus').value = 'active';
         document.getElementById('projPriority').value = 'medium';
     }
     openModal('projectModal');
@@ -416,14 +358,14 @@ async function editProject(id) {
         editingProjectId = id;
         document.getElementById('projectModalTitle').textContent = 'Edit Project';
         document.getElementById('editProjectId').value = id;
-        document.getElementById('projName').value     = p.name || '';
-        document.getElementById('projDesc').value     = p.description || '';
-        document.getElementById('projStack').value    = p.stack || '';
-        document.getElementById('projTech').value     = (p.tech || []).join(', ');
-        document.getElementById('projGoals').value    = p.goals || '';
-        document.getElementById('projUrl').value      = p.url || '';
-        document.getElementById('projPath').value     = p.path || '';
-        document.getElementById('projStatus').value   = p.status || 'active';
+        document.getElementById('projName').value = p.name || '';
+        document.getElementById('projDesc').value = p.description || '';
+        document.getElementById('projStack').value = p.stack || '';
+        document.getElementById('projTech').value = (p.tech || []).join(', ');
+        document.getElementById('projGoals').value = p.goals || '';
+        document.getElementById('projUrl').value = p.url || '';
+        document.getElementById('projPath').value = p.path || '';
+        document.getElementById('projStatus').value = p.status || 'active';
         document.getElementById('projPriority').value = p.priority || 'medium';
         openModal('projectModal');
     } catch (e) { showToast('Failed to load project', 'error'); }
@@ -436,16 +378,16 @@ async function submitProject() {
     const payload = {
         name,
         description: document.getElementById('projDesc').value.trim(),
-        stack:       document.getElementById('projStack').value.trim(),
-        tech:        document.getElementById('projTech').value,
-        goals:       document.getElementById('projGoals').value.trim(),
-        url:         document.getElementById('projUrl').value.trim(),
-        path:        document.getElementById('projPath').value.trim(),
-        status:      document.getElementById('projStatus').value,
-        priority:    document.getElementById('projPriority').value,
+        stack: document.getElementById('projStack').value.trim(),
+        tech: document.getElementById('projTech').value,
+        goals: document.getElementById('projGoals').value.trim(),
+        url: document.getElementById('projUrl').value.trim(),
+        path: document.getElementById('projPath').value.trim(),
+        status: document.getElementById('projStatus').value,
+        priority: document.getElementById('projPriority').value,
     };
     try {
-        const url    = id ? `/api/projects/${id}` : '/api/projects';
+        const url = id ? `/api/projects/${id}` : '/api/projects';
         const method = id ? 'PUT' : 'POST';
         const r = await fetch(url, {
             method,
@@ -469,7 +411,7 @@ async function deleteProject(id, el) {
         await fetch(`/api/projects/${id}`, { method: 'DELETE' });
         el.closest('.project-card').remove();
         showToast('Project deleted', 'info');
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // ── Memory Browser ────────────────────────
@@ -485,7 +427,7 @@ async function loadMemoryBrowser(reset = false) {
         const d = await r.json();
         renderMemoryList(d.memories || []);
         renderSourceFilter(d.sources || []);
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function renderSourceFilter(sources) {
@@ -538,7 +480,7 @@ async function deleteMemory(id, el) {
         el.closest('.memory-item').remove();
         loadMemoryStats();
         showToast('Memory deleted', 'info');
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function debounceMemSearch() {
@@ -556,8 +498,8 @@ function openTeachModal() {
 }
 
 async function submitTeach() {
-    const content    = document.getElementById('teachContent').value.trim();
-    const category   = document.getElementById('teachCategory').value;
+    const content = document.getElementById('teachContent').value.trim();
+    const category = document.getElementById('teachCategory').value;
     const importance = document.getElementById('teachImportance').value;
     if (!content) { showToast('Please enter something to remember', 'error'); return; }
     try {
@@ -581,8 +523,8 @@ async function submitTeach() {
 // ── Import Modal ──────────────────────────
 function openImportModal() {
     importSelectedSource = 'auto';
-    importFileContent    = null;
-    importFileName       = '';
+    importFileContent = null;
+    importFileName = '';
     document.getElementById('importPasteArea').value = '';
     document.getElementById('dropFilename').classList.add('hidden');
     document.getElementById('dropFilename').textContent = '';
@@ -605,7 +547,7 @@ function handleImportFile(input) {
     if (!file) return;
     importFileName = file.name;
     const fn = document.getElementById('dropFilename');
-    fn.textContent = `📄 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+    fn.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
     fn.classList.remove('hidden');
 
     const reader = new FileReader();
@@ -636,7 +578,7 @@ function setupDropZone() {
 }
 
 async function submitImport() {
-    const content   = importFileContent || document.getElementById('importPasteArea').value;
+    const content = importFileContent || document.getElementById('importPasteArea').value;
     const pasteText = document.getElementById('importPasteArea').value.trim();
 
     if (!content && !pasteText) {
@@ -672,9 +614,9 @@ async function submitImport() {
         const d = await res.json();
         if (d.success) {
             const preview = document.getElementById('importPreview');
-            const count   = document.getElementById('previewCount');
+            const count = document.getElementById('previewCount');
             const samples = document.getElementById('previewSamples');
-            count.textContent   = `✓ ${d.imported} memories imported from ${d.format}`;
+            count.textContent = `✓ ${d.imported} memories imported from ${d.format}`;
             samples.innerHTML = (d.preview || []).map(p =>
                 `<div class="preview-sample">${escHtml(p.substring(0, 120))}...</div>`
             ).join('');
@@ -704,11 +646,11 @@ function switchTab(tab) {
     document.getElementById('tab-' + tab)?.classList.add('active');
     document.getElementById('panel-' + tab)?.classList.add('active');
 
-    if (tab === 'tasks')    loadTasks();
-    if (tab === 'notes')    loadNotes();
-    if (tab === 'memory')   loadMemoryBrowser(true);
+    if (tab === 'tasks') loadTasks();
+    if (tab === 'notes') loadNotes();
+    if (tab === 'memory') loadMemoryBrowser(true);
     if (tab === 'projects') loadProjectsTab();
-    if (tab === 'agent')    cuInit();
+    if (tab === 'agent') cuInit();
 }
 
 // ── Tasks ─────────────────────────────────
@@ -719,7 +661,7 @@ function showAddTask() {
 }
 
 async function submitTask() {
-    const title   = document.getElementById('taskTitle').value.trim();
+    const title = document.getElementById('taskTitle').value.trim();
     const project = document.getElementById('taskProject').value.trim();
     if (!title) return;
     try {
@@ -728,7 +670,7 @@ async function submitTask() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, project: project || null })
         });
-        document.getElementById('taskTitle').value   = '';
+        document.getElementById('taskTitle').value = '';
         document.getElementById('taskProject').value = '';
         document.getElementById('addTaskForm').classList.add('hidden');
         loadTasks();
@@ -744,7 +686,7 @@ async function completeTask(id, el) {
         setTimeout(() => el.closest('.task-item').remove(), 400);
         loadMemoryStats();
         showToast('Task completed ✓', 'success');
-    } catch (e) {}
+    } catch (e) { }
 }
 
 async function loadTasks() {
@@ -769,7 +711,7 @@ async function loadTasks() {
             `;
             list.appendChild(el);
         });
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // ── Notes ─────────────────────────────────
@@ -780,7 +722,7 @@ function showAddNote() {
 }
 
 async function submitNote() {
-    const title   = document.getElementById('noteTitle').value.trim();
+    const title = document.getElementById('noteTitle').value.trim();
     const content = document.getElementById('noteContent').value.trim();
     if (!title) return;
     try {
@@ -789,7 +731,7 @@ async function submitNote() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, content })
         });
-        document.getElementById('noteTitle').value   = '';
+        document.getElementById('noteTitle').value = '';
         document.getElementById('noteContent').value = '';
         document.getElementById('addNoteForm').classList.add('hidden');
         loadNotes();
@@ -804,7 +746,7 @@ async function deleteNote(id, el) {
         el.closest('.note-item').remove();
         loadMemoryStats();
         showToast('Note deleted', 'info');
-    } catch (e) {}
+    } catch (e) { }
 }
 
 async function loadNotes() {
@@ -831,7 +773,7 @@ async function loadNotes() {
             `;
             list.appendChild(el);
         });
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // ── Modal helpers ─────────────────────────
@@ -929,7 +871,7 @@ async function cuStart() {
     try {
         const r = await fetch('/api/computer-use/run', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ task, max_steps: parseInt(maxSteps) })
         });
         const d = await r.json();
@@ -947,7 +889,7 @@ async function cuStop() {
     cuLog('Stop signal sent...', 'warning');
     try {
         await fetch('/api/computer-use/stop', { method: 'POST' });
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function cuSetRunning(running) {
@@ -1031,7 +973,7 @@ function cuLog(msg, type = 'info') {
 
     const entry = document.createElement('div');
     entry.className = `cu-log-entry cu-log-${type}`;
-    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     entry.innerHTML = `<span class="cu-log-time">${time}</span><span class="cu-log-msg">${escHtml(msg)}</span>`;
     container.appendChild(entry);
     container.scrollTop = container.scrollHeight;

@@ -66,7 +66,7 @@ call "%VENV_DIR%\Scripts\activate.bat"
 :: ── Install packages ──────────────────
 echo.
 echo  [4/7] Installing packages (this may take 2-3 minutes)...
-pip install --upgrade pip --quiet
+pip install --upgrade pip --quiet --disable-pip-version-check 2>nul
 pip install -r "%JARVIS_DIR%\requirements.txt" --quiet --no-warn-script-location
 if %errorlevel% neq 0 (
     echo  [!] Some packages failed. Retrying without quiet mode...

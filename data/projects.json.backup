@@ -1,0 +1,48 @@
+[
+  {
+    "name": "VORAX",
+    "description": "AI faceless YouTube video SaaS",
+    "stack": "FastAPI + Vite React TS",
+    "tech": [
+      "Groq/Llama scripting",
+      "Sarvam AI voice",
+      "Pexels footage",
+      "Shotstack"
+    ],
+    "path": "d:/projects/vorax",
+    "priority": "high",
+    "status": "active"
+  },
+  {
+    "name": "Rashi IDE",
+    "description": "Local Replit-style IDE with 5 agent modes",
+    "stack": "Flask backend",
+    "path": "d:/projects/rashi-ide",
+    "priority": "high",
+    "status": "active"
+  },
+  {
+    "name": "MarketX Vault",
+    "description": "Flutter Android vault disguised as trading app",
+    "stack": "Flutter",
+    "path": "d:/projects/marketx-vault",
+    "priority": "medium",
+    "status": "planning"
+  },
+  {
+    "name": "SoulVault",
+    "description": "AI emotional memory simulation app",
+    "stack": "Flutter/Firebase",
+    "path": "d:/projects/soulvault",
+    "priority": "medium",
+    "status": "planning"
+  },
+  {
+    "name": "Godfather Agent",
+    "description": "Make.com 15-route automation agent",
+    "stack": "Make.com",
+    "path": null,
+    "priority": "low",
+    "status": "active"
+  }
+]

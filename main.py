@@ -15,6 +15,12 @@ import threading
 from pathlib import Path
 from datetime import datetime
 
+# ── Force UTF-8 output so Unicode banners/emoji don't crash on Windows cp1252 ──
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -267,7 +273,10 @@ def update_state():
 def system_stats():
     try:
         import psutil
-        cpu = psutil.cpu_percent(interval=0.1)
+        import threading
+        
+        # Use non-blocking call
+        cpu = psutil.cpu_percent(interval=None)
         mem = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
         net = psutil.net_io_counters()
@@ -364,17 +373,6 @@ def add_note_api():
 def delete_note_api(note_id):
     memory.delete_note(note_id)
     return jsonify({'success': True})
-
-# ── User Profile ──────────────────────────
-@app.route('/api/profile', methods=['GET'])
-def get_profile():
-    return jsonify(memory.get_profile())
-
-@app.route('/api/profile', methods=['POST'])
-def update_profile():
-    data = request.json or {}
-    memory.update_profile(data)
-    return jsonify({'success': True, 'profile': memory.get_profile()})
 
 # ── Memory Browse / Teach / Delete ────────
 @app.route('/api/memory/browse', methods=['GET'])
