@@ -56,6 +56,11 @@ function initSocketIO() {
         projectBadge.textContent = d.project;
         showToast(`Switched to ${d.project}`, 'info');
     });
+
+    socket.on('cu_started',    (d) => cuOnStarted(d));
+    socket.on('cu_screenshot', (d) => cuOnScreenshot(d));
+    socket.on('cu_step',       (d) => cuOnStep(d));
+    socket.on('cu_finished',   (d) => cuOnFinished(d));
 }
 
 function setStatus(cls, label) {
@@ -703,6 +708,7 @@ function switchTab(tab) {
     if (tab === 'notes')    loadNotes();
     if (tab === 'memory')   loadMemoryBrowser(true);
     if (tab === 'projects') loadProjectsTab();
+    if (tab === 'agent')    cuInit();
 }
 
 // ── Tasks ─────────────────────────────────
@@ -876,4 +882,162 @@ function escHtml(str) {
     return String(str || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ════════════════════════════════════════════
+//  COMPUTER USE AGENT
+// ════════════════════════════════════════════
+
+let cuRunning = false;
+
+// Called when the Agent tab is first shown — check environment
+async function cuInit() {
+    try {
+        const r = await fetch('/api/computer-use/status');
+        const d = await r.json();
+        const el = document.getElementById('cuAvailability');
+        if (d.pyautogui_available) {
+            el.innerHTML = '<div class="cu-avail-ok">✅ Desktop control available — JARVIS can see and control your screen.</div>';
+            document.getElementById('cuTaskForm').classList.remove('hidden');
+        } else {
+            el.innerHTML = `
+                <div class="cu-avail-warn">
+                    <strong>⚠️ Local install required</strong><br>
+                    Computer Use only works when JARVIS runs locally on your machine.<br>
+                    <code>JARVIS-Setup.bat</code> will install everything in one click on Windows.
+                </div>`;
+            document.getElementById('cuTaskForm').classList.add('hidden');
+        }
+        if (d.running) {
+            cuSetRunning(true);
+            cuLog(`Resuming task: ${d.task}`, 'info');
+        }
+    } catch (e) {
+        document.getElementById('cuAvailability').innerHTML = '<div class="cu-avail-warn">Could not reach server.</div>';
+    }
+}
+
+async function cuStart() {
+    const task = document.getElementById('cuTaskInput').value.trim();
+    const maxSteps = document.getElementById('cuMaxSteps').value;
+    if (!task) { showToast('Please describe a task first', 'warning'); return; }
+
+    cuSetRunning(true);
+    cuClearLog();
+    cuLog(`Starting task: ${task}`, 'info');
+
+    try {
+        const r = await fetch('/api/computer-use/run', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ task, max_steps: parseInt(maxSteps) })
+        });
+        const d = await r.json();
+        if (!d.success) {
+            cuLog(`Error: ${d.error}`, 'error');
+            cuSetRunning(false);
+        }
+    } catch (e) {
+        cuLog(`Request failed: ${e.message}`, 'error');
+        cuSetRunning(false);
+    }
+}
+
+async function cuStop() {
+    cuLog('Stop signal sent...', 'warning');
+    try {
+        await fetch('/api/computer-use/stop', { method: 'POST' });
+    } catch (e) {}
+}
+
+function cuSetRunning(running) {
+    cuRunning = running;
+    const badge = document.getElementById('cuStatusBadge');
+    const runBtn = document.getElementById('cuRunBtn');
+    const stopBtn = document.getElementById('cuStopBtn');
+    const liveEl = document.getElementById('cuLive');
+
+    if (running) {
+        badge.textContent = '● Running';
+        badge.className = 'cu-badge running';
+        runBtn.classList.add('hidden');
+        stopBtn.classList.remove('hidden');
+        liveEl.classList.remove('hidden');
+    } else {
+        badge.textContent = 'Idle';
+        badge.className = 'cu-badge';
+        runBtn.classList.remove('hidden');
+        stopBtn.classList.add('hidden');
+    }
+}
+
+// Socket.IO callbacks
+function cuOnStarted(d) {
+    cuLog(`Agent started — task: "${d.task}" | max steps: ${d.max_steps}`, 'info');
+}
+
+function cuOnScreenshot(d) {
+    const img = document.getElementById('cuScreenshot');
+    const thinking = document.getElementById('cuThinking');
+    if (img && d.screenshot) {
+        img.src = `data:image/jpeg;base64,${d.screenshot}`;
+    }
+    if (thinking) thinking.classList.remove('hidden');
+    document.getElementById('cuStepCounter').textContent = `Step ${d.step}`;
+}
+
+function cuOnStep(d) {
+    const thinking = document.getElementById('cuThinking');
+    if (thinking) thinking.classList.add('hidden');
+
+    if (d.screenshot) {
+        const img = document.getElementById('cuScreenshot');
+        if (img) img.src = `data:image/jpeg;base64,${d.screenshot}`;
+    }
+
+    if (d.error) {
+        cuLog(`Step ${d.step} ERROR: ${d.error}`, 'error');
+        return;
+    }
+
+    const icon = {
+        click: '🖱️', double_click: '🖱️🖱️', right_click: '🖱️',
+        type: '⌨️', press: '⌨️', hotkey: '⌨️',
+        scroll: '↕️', move: '→', wait: '⏳', done: '✅'
+    }[d.action_type] || '▶';
+
+    const msg = d.result?.message || d.result?.error || d.action_type;
+    cuLog(`${icon} Step ${d.step}: ${d.description || d.action_type} — ${msg}`, 'step');
+}
+
+function cuOnFinished(d) {
+    cuSetRunning(false);
+    document.getElementById('cuThinking')?.classList.add('hidden');
+    if (d.success) {
+        cuLog(`✅ Done in ${d.total_steps} steps: ${d.message}`, 'success');
+        showToast(`Task done: ${d.message}`, 'success', 5000);
+    } else if (d.stopped) {
+        cuLog(`⏹ Stopped after ${d.total_steps} steps`, 'warning');
+    } else {
+        cuLog(`❌ Failed after ${d.total_steps} steps: ${d.error}`, 'error');
+        showToast(`Agent failed: ${d.error}`, 'error', 5000);
+    }
+}
+
+function cuLog(msg, type = 'info') {
+    const container = document.getElementById('cuLogEntries');
+    const idle = container.querySelector('.cu-log-idle');
+    if (idle) idle.remove();
+
+    const entry = document.createElement('div');
+    entry.className = `cu-log-entry cu-log-${type}`;
+    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    entry.innerHTML = `<span class="cu-log-time">${time}</span><span class="cu-log-msg">${escHtml(msg)}</span>`;
+    container.appendChild(entry);
+    container.scrollTop = container.scrollHeight;
+}
+
+function cuClearLog() {
+    const container = document.getElementById('cuLogEntries');
+    container.innerHTML = '<div class="cu-log-idle">No task running</div>';
 }

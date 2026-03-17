@@ -48,6 +48,7 @@ from core.context import ProjectContext
 from core.importer import parse_import
 from config import Config
 from tools.voice_out import VoiceOutput
+from tools.computer_use import ComputerUseAgent
 
 app = Flask(__name__,
             template_folder='ui/templates',
@@ -80,6 +81,9 @@ config = Config()
 memory = Memory()
 project_context = ProjectContext()
 voice_output = VoiceOutput()
+
+# ── Computer use agent (singleton, one task at a time) ────
+computer_agent = ComputerUseAgent()
 
 # ── Module-level startup (runs under gunicorn too) ────────
 config.load()
@@ -537,6 +541,102 @@ def server_error(e):
 # ═══════════════════════════════════════════
 #  SOCKET.IO EVENTS
 # ═══════════════════════════════════════════
+
+# ═══════════════════════════════════════════
+#  COMPUTER USE AGENT ROUTES
+# ═══════════════════════════════════════════
+
+@app.route('/api/computer-use/screenshot', methods=['GET'])
+def cu_screenshot():
+    """Take a screenshot and return it as base64 for the live preview."""
+    from tools.pc_control import PYAUTOGUI_AVAILABLE
+    if not PYAUTOGUI_AVAILABLE:
+        return jsonify({
+            'success': False,
+            'error': 'pyautogui not available — run JARVIS locally via JARVIS-Setup.bat'
+        }), 200
+    b64 = computer_agent.take_screenshot()
+    if b64:
+        return jsonify({'success': True, 'screenshot': b64})
+    return jsonify({'success': False, 'error': 'Screenshot failed'})
+
+
+@app.route('/api/computer-use/run', methods=['POST'])
+def cu_run():
+    """Start a computer use agent task (runs in background thread, streams via Socket.IO)."""
+    if computer_agent.running:
+        return jsonify({'success': False, 'error': 'Agent already running — stop it first'}), 400
+
+    data = request.json or {}
+    task = (data.get('task') or '').strip()
+    max_steps = min(int(data.get('max_steps', 25)), 50)
+
+    if not task:
+        return jsonify({'success': False, 'error': 'task is required'}), 400
+
+    groq_key = os.environ.get('GROQ_API_KEY', '')
+    if not groq_key:
+        return jsonify({'success': False, 'error': 'GROQ_API_KEY not set'}), 400
+
+    try:
+        from groq import Groq
+        computer_agent.groq_client = Groq(api_key=groq_key)
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Groq init failed: {e}'}), 500
+
+    def on_step(step_info):
+        payload = {
+            'step': step_info['step'],
+            'description': step_info.get('description', ''),
+            'action_type': step_info.get('action', {}).get('type', ''),
+            'result': step_info.get('result', {}),
+            'error': step_info.get('error', ''),
+            'screenshot': step_info.get('screenshot', ''),
+        }
+        socketio.emit('cu_step', payload)
+
+    def on_screenshot(b64, step_num):
+        socketio.emit('cu_screenshot', {'screenshot': b64, 'step': step_num})
+
+    def run_task():
+        socketio.emit('cu_started', {'task': task, 'max_steps': max_steps})
+        result = computer_agent.run(
+            task=task,
+            max_steps=max_steps,
+            on_step=on_step,
+            on_screenshot=on_screenshot,
+        )
+        socketio.emit('cu_finished', {
+            'success': result.get('success', False),
+            'message': result.get('message', ''),
+            'error': result.get('error', ''),
+            'stopped': result.get('stopped', False),
+            'total_steps': len(result.get('steps', [])),
+        })
+
+    t = threading.Thread(target=run_task, daemon=True)
+    t.start()
+
+    return jsonify({'success': True, 'message': f'Agent started on task: {task}'})
+
+
+@app.route('/api/computer-use/stop', methods=['POST'])
+def cu_stop():
+    """Stop the running computer use agent."""
+    computer_agent.stop()
+    return jsonify({'success': True, 'message': 'Stop signal sent'})
+
+
+@app.route('/api/computer-use/status', methods=['GET'])
+def cu_status():
+    """Return current agent status."""
+    return jsonify({
+        'running': computer_agent.running,
+        'task': computer_agent.current_task,
+        'steps_taken': len(computer_agent.steps),
+        'pyautogui_available': bool(__import__('tools.pc_control', fromlist=['PYAUTOGUI_AVAILABLE']).PYAUTOGUI_AVAILABLE),
+    })
+
 
 @socketio.on('connect')
 def handle_connect():

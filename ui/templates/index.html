@@ -153,6 +153,7 @@
                 <button class="tab-btn" onclick="switchTab('memory')" id="tab-memory">Memory</button>
                 <button class="tab-btn" onclick="switchTab('tasks')" id="tab-tasks">Tasks</button>
                 <button class="tab-btn" onclick="switchTab('notes')" id="tab-notes">Notes</button>
+                <button class="tab-btn cu-tab-btn" onclick="switchTab('agent')" id="tab-agent">&#x1F916; Agent</button>
             </div>
 
             <!-- System Tab -->
@@ -270,6 +271,61 @@
                     </div>
                     <div class="notes-list" id="notesList">
                         <div class="empty-state">No notes yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent (Computer Use) Tab -->
+            <div class="tab-panel" id="panel-agent">
+                <div class="sidebar-section cu-panel">
+                    <div class="cu-header">
+                        <h3>&#x1F916; Computer Use Agent</h3>
+                        <span class="cu-badge" id="cuStatusBadge">Idle</span>
+                    </div>
+                    <p class="cu-description">Tell JARVIS what to do on your screen. It will see your desktop and take action — just like UI-TARS.</p>
+
+                    <div class="cu-availability" id="cuAvailability">
+                        <div class="cu-avail-checking">Checking environment...</div>
+                    </div>
+
+                    <div class="cu-task-form" id="cuTaskForm">
+                        <textarea id="cuTaskInput" class="cu-task-input" placeholder="e.g. Open VS Code and create a new Python file called hello.py&#10;e.g. Search for 'Python tutorials' on Google&#10;e.g. Open Spotify and play something chill" rows="4"></textarea>
+                        <div class="cu-options">
+                            <label class="cu-option-label">Max steps:</label>
+                            <select id="cuMaxSteps" class="cu-select">
+                                <option value="10">10 (quick)</option>
+                                <option value="25" selected>25 (normal)</option>
+                                <option value="50">50 (complex)</option>
+                            </select>
+                        </div>
+                        <div class="cu-actions">
+                            <button class="cu-run-btn" id="cuRunBtn" onclick="cuStart()">&#x25B6; Run Agent</button>
+                            <button class="cu-stop-btn hidden" id="cuStopBtn" onclick="cuStop()">&#x25A0; Stop</button>
+                        </div>
+                    </div>
+
+                    <div class="cu-live hidden" id="cuLive">
+                        <div class="cu-live-header">
+                            <span class="cu-live-label">&#x1F4F8; Live Screen</span>
+                            <span class="cu-step-counter" id="cuStepCounter">Step 0</span>
+                        </div>
+                        <div class="cu-screenshot-wrap">
+                            <img id="cuScreenshot" class="cu-screenshot" src="" alt="Live screen">
+                            <div class="cu-thinking-overlay hidden" id="cuThinking">
+                                <div class="cu-thinking-spinner"></div>
+                                <span>Thinking...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cu-log" id="cuLog">
+                        <div class="cu-log-header">
+                            <span>Agent Log</span>
+                            <button class="cu-clear-btn" onclick="cuClearLog()">Clear</button>
+                        </div>
+                        <div class="cu-log-entries" id="cuLogEntries">
+                            <div class="cu-log-idle">No task running</div>
+                        </div>
                     </div>
                 </div>
             </div>

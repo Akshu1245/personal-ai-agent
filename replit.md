@@ -106,9 +106,32 @@ data/projects.json   - Seed data (migrated to SQLite on first run)
 | `user_profile` | Name, model preference, theme |
 | `memory_imports` | Import log (source, filename, count, timestamp) |
 
+## Computer Use Agent (`tools/computer_use.py`)
+
+Inspired by UI-TARS-desktop — JARVIS can see your screen and control your computer autonomously.
+
+**How it works:**
+1. Takes a screenshot of the screen (pyautogui)
+2. Sends it to a Groq vision model (`llama-4-scout-17b` → `llama-3.2-11b-vision` fallback)
+3. Model responds with a JSON action (click x/y, type text, press key, scroll, wait, done)
+4. Executes the action with pyautogui
+5. Repeats until task is done or max_steps reached
+
+**Available actions:** click, double_click, right_click, type, press, hotkey, scroll, move, wait, done
+
+**API routes:**
+- `GET /api/computer-use/status` — running state + pyautogui availability
+- `GET /api/computer-use/screenshot` — live screenshot as base64
+- `POST /api/computer-use/run` — start agent task `{task, max_steps}`
+- `POST /api/computer-use/stop` — stop current task
+
+**Streaming:** Steps + screenshots streamed in real-time via Socket.IO (`cu_started`, `cu_screenshot`, `cu_step`, `cu_finished`)
+
+**Requirement:** Runs only when JARVIS is installed locally (not on Replit server). Use `JARVIS-Setup.bat` on Windows.
+
 ## UI Features
 
-- **5 sidebar tabs**: System / Projects / Memory / Tasks / Notes
+- **6 sidebar tabs**: System / Projects / Memory / Tasks / Notes / 🤖 Agent
 - **Profile modal**: Name + AI model selection, avatar with initial
 - **Projects tab**: Full CRUD — add/edit/delete projects with goals, stack, URL, path
 - **Memory tab**: Browse/search all memories, filter by source, delete, + Teach + Import buttons
