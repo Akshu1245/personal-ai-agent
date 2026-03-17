@@ -21,51 +21,42 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSystemInfo();
 });
 
-// WebSocket Connection
+// Socket.IO Connection
 function initWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    socket = io({
+        transports: ['polling', 'websocket'],
+        reconnectionAttempts: 10,
+        reconnectionDelay: 2000
+    });
     
-    socket = new WebSocket(wsUrl);
-    
-    socket.onopen = () => {
+    socket.on('connect', () => {
         console.log('Connected to JARVIS');
         statusDot.style.background = '#00ff88';
         statusText.textContent = 'Online';
-    };
+    });
     
-    socket.onclose = () => {
+    socket.on('disconnect', () => {
         console.log('Disconnected from JARVIS');
         statusDot.style.background = '#ff4466';
         statusText.textContent = 'Offline';
-        // Reconnect after 3 seconds
-        setTimeout(initWebSocket, 3000);
-    };
+    });
     
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleWebSocketMessage(data);
-    };
-    
-    socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-}
-
-// Handle WebSocket messages
-function handleWebSocketMessage(data) {
-    if (data.status !== undefined) {
-        // Status update
+    socket.on('jarvis_status', (data) => {
         if (data.listening !== undefined) {
             isListening = data.listening;
             voiceBtn.classList.toggle('active', isListening);
         }
-    }
+    });
     
-    if (data.text !== undefined) {
-        // JARVIS response
-        addMessage('bot', data.text);
-    }
+    socket.on('jarvis_response', (data) => {
+        if (data.text) {
+            addMessage('bot', data.text);
+        }
+    });
+    
+    socket.on('connect_error', (error) => {
+        console.error('Socket.IO connection error:', error);
+    });
 }
 
 // Event Listeners
@@ -163,21 +154,21 @@ function formatMessage(text) {
 
 // Voice Input
 function startVoice() {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.log('WebSocket not connected');
+    if (!socket || !socket.connected) {
+        console.log('Socket.IO not connected');
         return;
     }
     
     isListening = true;
-    socket.send(JSON.stringify({ voice_start: true }));
+    socket.emit('voice_start');
     voiceBtn.classList.add('listening');
 }
 
 function stopVoice() {
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    if (!socket || !socket.connected) return;
     
     isListening = false;
-    socket.send(JSON.stringify({ voice_stop: true }));
+    socket.emit('voice_stop');
     voiceBtn.classList.remove('listening');
 }
 

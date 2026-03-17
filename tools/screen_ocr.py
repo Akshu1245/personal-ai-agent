@@ -6,18 +6,30 @@ Author: Rashi AI
 Built for: Akshay
 """
 
-import pytesseract
-from PIL import Image
-import pyautogui
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-# Try to import, handle if not available
 try:
     import pytesseract
     TESSERACT_AVAILABLE = True
 except ImportError:
+    pytesseract = None
     TESSERACT_AVAILABLE = False
+
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    Image = None
+    PIL_AVAILABLE = False
+
+try:
+    import pyautogui
+    PYAUTOGUI_AVAILABLE = True
+except Exception:
+    pyautogui = None
+    PYAUTOGUI_AVAILABLE = False
+
 
 
 def capture_and_read(x: int = None, y: int = None, width: int = None, height: int = None) -> Dict[str, Any]:

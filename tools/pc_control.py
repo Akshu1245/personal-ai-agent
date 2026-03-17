@@ -8,14 +8,25 @@ Built for: Akshay
 
 import os
 import subprocess
-import pyautogui
-import pynput
 from pathlib import Path
 from typing import Optional, Dict, Any
 
-# Disable fail-safe for automated use (with caution)
-pyautogui.FAILSAFE = True
-pyautogui.PAUSE = 0.5
+# Try to import GUI automation libraries (not available in server environments)
+try:
+    import pyautogui
+    pyautogui.FAILSAFE = True
+    pyautogui.PAUSE = 0.5
+    PYAUTOGUI_AVAILABLE = True
+except Exception:
+    pyautogui = None
+    PYAUTOGUI_AVAILABLE = False
+
+try:
+    import pynput
+    PYNPUT_AVAILABLE = True
+except Exception:
+    pynput = None
+    PYNPUT_AVAILABLE = False
 
 
 # ==================== APP LAUNCHER ====================

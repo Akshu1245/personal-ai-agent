@@ -59,3 +59,19 @@ GPUtil>=1.4.0
 
 # Note: Tesseract OCR requires separate installation
 # Download from: https://github.com/UB-Mannheim/tesseract/wiki
+APScheduler
+beautifulsoup4
+flask
+flask-socketio
+GitPython
+groq
+Pillow
+psutil
+pyperclip
+python-dotenv
+requests
+schedule
+flask
+flask-socketio
+groq
+python-dotenv

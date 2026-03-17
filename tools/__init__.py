@@ -6,31 +6,6 @@ Author: Rashi AI
 Built for: Akshay
 """
 
-# Import all tools
-from tools import pc_control
-from tools import file_ops
-from tools import browser
-from tools import voice_in
-from tools import voice_out
-from tools import web_search
-from tools import code_runner
-from tools import focus_mode
-from tools import crypto_watch
-from tools import notes
-from tools import scheduler
-from tools import clipboard
-from tools import system_info
-from tools import screen_ocr
-from tools import youtube_summarizer
-from tools import github_ops
-from tools import gpu_monitor
-from tools import email_draft
-from tools import pdf_summarizer
-from tools import whatsapp
-from tools import startup
-from tools import wake_word
-from tools import kannada_voice
-
 __all__ = [
     'pc_control',
     'file_ops',
