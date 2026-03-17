@@ -714,3 +714,89 @@ body {
     .message { max-width: 95%; }
     .header-center { display: none; }
 }
+
+/* ── PWA Install Banner ───────────────────── */
+.pwa-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    width: calc(100% - 40px);
+    max-width: 520px;
+    background: linear-gradient(135deg, rgba(0,212,255,0.12) 0%, rgba(8,11,15,0.98) 100%);
+    border: 1px solid rgba(0,212,255,0.35);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,212,255,0.1);
+    backdrop-filter: blur(16px);
+    animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.pwa-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+}
+.pwa-banner-icon img {
+    border-radius: 8px;
+    display: block;
+}
+.pwa-banner-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.pwa-banner-text strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.04em;
+}
+.pwa-banner-text span {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.pwa-install-btn {
+    background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-glow));
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.03em;
+}
+.pwa-install-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,212,255,0.4);
+}
+.pwa-dismiss-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+.pwa-dismiss-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+.pwa-header-btn {
+    color: var(--cyan-primary) !important;
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@media (max-width: 480px) {
+    .pwa-banner { bottom: 80px; }
+    .pwa-banner-text span { display: none; }
+}

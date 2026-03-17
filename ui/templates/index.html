@@ -2,13 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>JARVIS — Personal AI Agent</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230a0a0f'/><circle cx='16' cy='16' r='6' fill='%2300d4ff'/><circle cx='16' cy='16' r='10' fill='none' stroke='%2300d4ff' stroke-width='1.5' opacity='0.6'/><circle cx='16' cy='16' r='14' fill='none' stroke='%2300d4ff' stroke-width='1' opacity='0.3'/></svg>">
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Theme & status bar -->
+    <meta name="theme-color" content="#00d4ff">
+    <meta name="msapplication-TileColor" content="#080b0f">
+    <meta name="msapplication-TileImage" content="/static/icons/icon-144x144.png">
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JARVIS">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png">
+
+    <!-- SEO / share -->
+    <meta name="description" content="JARVIS — Just A Rather Very Intelligent System. Your personal AI desktop agent.">
+    <meta name="application-name" content="JARVIS">
+    <meta name="author" content="Akshay">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192x192.png">
+
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="pwa-banner hidden">
+        <div class="pwa-banner-content">
+            <div class="pwa-banner-icon">
+                <img src="/static/icons/icon-72x72.png" alt="JARVIS" width="32" height="32">
+            </div>
+            <div class="pwa-banner-text">
+                <strong>Install JARVIS</strong>
+                <span>Add to your desktop — works like a native app</span>
+            </div>
+            <button class="pwa-install-btn" id="pwaInstallBtn">Install App</button>
+            <button class="pwa-dismiss-btn" id="pwaDismissBtn" title="Dismiss">✕</button>
+        </div>
+    </div>
+
     <!-- API Key Warning Banner -->
     <div id="apiWarning" class="api-warning hidden">
         ⚠️ GROQ_API_KEY not set — AI responses disabled. Add it in Secrets to enable chat.
@@ -42,6 +81,9 @@
                     <span class="status-dot" id="statusDot"></span>
                     <span id="statusText">Connecting...</span>
                 </div>
+                <button class="icon-btn pwa-header-btn hidden" id="pwaHeaderBtn" title="Install JARVIS as desktop app">
+                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+                </button>
                 <button class="icon-btn" onclick="clearChat()" title="Clear chat">
                     <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12z"/></svg>
                 </button>
@@ -216,5 +258,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <script src="/static/jarvis.js"></script>
+
+    <!-- Service Worker + PWA Install Prompt -->
+    <script>
+    (function() {
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .catch(() => {});
+            });
+        }
+
+        // Capture install prompt
+        let deferredPrompt = null;
+        const banner      = document.getElementById('pwaInstallBanner');
+        const installBtn  = document.getElementById('pwaInstallBtn');
+        const dismissBtn  = document.getElementById('pwaDismissBtn');
+        const headerBtn   = document.getElementById('pwaHeaderBtn');
+
+        const dismissed = localStorage.getItem('jarvis-pwa-dismissed');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show banner unless user previously dismissed
+            if (!dismissed) {
+                banner.classList.remove('hidden');
+            }
+            // Always show header icon
+            if (headerBtn) headerBtn.classList.remove('hidden');
+        });
+
+        function triggerInstall() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((result) => {
+                if (result.outcome === 'accepted') {
+                    banner.classList.add('hidden');
+                    if (headerBtn) headerBtn.classList.add('hidden');
+                    if (typeof showToast === 'function') {
+                        showToast('JARVIS installed as desktop app!', 'success');
+                    }
+                }
+                deferredPrompt = null;
+            });
+        }
+
+        if (installBtn)  installBtn.addEventListener('click', triggerInstall);
+        if (headerBtn)   headerBtn.addEventListener('click', triggerInstall);
+        if (dismissBtn)  dismissBtn.addEventListener('click', () => {
+            banner.classList.add('hidden');
+            localStorage.setItem('jarvis-pwa-dismissed', '1');
+        });
+
+        // Hide install UI once already installed
+        window.addEventListener('appinstalled', () => {
+            banner.classList.add('hidden');
+            if (headerBtn) headerBtn.classList.add('hidden');
+        });
+    })();
+    </script>
 </body>
 </html>

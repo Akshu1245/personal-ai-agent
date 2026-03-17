@@ -127,6 +127,22 @@ def setup_page():
     """First-run setup wizard"""
     return render_template('setup.html')
 
+@app.route('/sw.js')
+def service_worker():
+    """Service worker served from root so it can control the full scope"""
+    resp = app.send_static_file('sw.js')
+    resp.headers['Content-Type'] = 'application/javascript'
+    resp.headers['Service-Worker-Allowed'] = '/'
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
+@app.route('/manifest.json')
+def pwa_manifest():
+    """PWA manifest"""
+    resp = app.send_static_file('manifest.json')
+    resp.headers['Content-Type'] = 'application/manifest+json'
+    return resp
+
 @app.route('/health')
 def health():
     """Health check — used by load balancers and monitoring"""
