@@ -6,11 +6,8 @@
 groq>=0.4.0
 
 # ==================== VOICE ====================
-faster-whisper>=0.10.0
 pyttsx3>=2.90
 SpeechRecognition>=3.10.0
-pyaudio>=0.2.14
-openWakeWord>=0.1.0
 
 # ==================== PC AUTOMATION ====================
 pyautogui>=0.9.54
@@ -19,7 +16,6 @@ psutil>=5.9.6
 pyperclip>=1.8.2
 
 # ==================== BROWSER ====================
-webbrowser (built-in)
 requests>=2.31.0
 beautifulsoup4>=4.12.2
 playwright>=1.40.0
@@ -47,7 +43,6 @@ uvicorn>=0.25.0
 
 # ==================== UTILS ====================
 python-dotenv>=1.0.0
-playsound>=1.3.0
 
 # ==================== GIT ====================
 GitPython>=3.1.40

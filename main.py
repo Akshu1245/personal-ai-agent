@@ -33,7 +33,7 @@ app = Flask(__name__,
             template_folder='ui/templates',
             static_folder='ui/static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'jarvis-secret-key-change-me')
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threaded')
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize core components
 config = Config()
