@@ -81,6 +81,7 @@
                     <span class="status-dot" id="statusDot"></span>
                     <span id="statusText">Connecting...</span>
                 </div>
+                <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="openProfileModal()" title="Edit profile">U</button>
                 <button class="icon-btn pwa-header-btn hidden" id="pwaHeaderBtn" title="Install JARVIS as desktop app">
                     <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
                 </button>
@@ -148,6 +149,8 @@
             <!-- Tabs -->
             <div class="sidebar-tabs">
                 <button class="tab-btn active" onclick="switchTab('system')" id="tab-system">System</button>
+                <button class="tab-btn" onclick="switchTab('projects')" id="tab-projects">Projects</button>
+                <button class="tab-btn" onclick="switchTab('memory')" id="tab-memory">Memory</button>
                 <button class="tab-btn" onclick="switchTab('tasks')" id="tab-tasks">Tasks</button>
                 <button class="tab-btn" onclick="switchTab('notes')" id="tab-notes">Notes</button>
             </div>
@@ -161,9 +164,7 @@
                             <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
                             CPU
                         </div>
-                        <div class="stat-bar">
-                            <div class="stat-fill" id="cpuBar" style="width:0%"></div>
-                        </div>
+                        <div class="stat-bar"><div class="stat-fill" id="cpuBar" style="width:0%"></div></div>
                         <span class="stat-val" id="cpuVal">0%</span>
                     </div>
                     <div class="stat-row">
@@ -171,9 +172,7 @@
                             <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M17 17H7V7h10m0-2H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>
                             RAM
                         </div>
-                        <div class="stat-bar">
-                            <div class="stat-fill" id="ramBar" style="width:0%"></div>
-                        </div>
+                        <div class="stat-bar"><div class="stat-fill" id="ramBar" style="width:0%"></div></div>
                         <span class="stat-val" id="ramVal">0%</span>
                     </div>
                     <div class="stat-row">
@@ -181,14 +180,11 @@
                             <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
                             Disk
                         </div>
-                        <div class="stat-bar">
-                            <div class="stat-fill" id="diskBar" style="width:0%"></div>
-                        </div>
+                        <div class="stat-bar"><div class="stat-fill" id="diskBar" style="width:0%"></div></div>
                         <span class="stat-val" id="diskVal">0%</span>
                     </div>
                     <div class="stat-detail" id="memDetail"></div>
                 </div>
-
                 <div class="sidebar-section">
                     <h3>Quick Actions</h3>
                     <button class="quick-action" onclick="quickAction('screenshot')">📸 Screenshot</button>
@@ -197,20 +193,48 @@
                     <button class="quick-action" onclick="quickAction('search')">🔍 Quick Search</button>
                     <button class="quick-action" onclick="quickAction('sysinfo')">🖥️ System Info</button>
                 </div>
-
                 <div class="sidebar-section">
-                    <h3>Active Projects</h3>
-                    <div class="project-list" id="projectList"></div>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3>Memory</h3>
+                    <h3>Memory Overview</h3>
                     <div class="memory-stats" id="memoryStats">
                         <div class="mem-item"><span>Conversations</span><span id="convCount">—</span></div>
                         <div class="mem-item"><span>Memories</span><span id="memCount">—</span></div>
                         <div class="mem-item"><span>Pending Tasks</span><span id="taskCount">—</span></div>
                         <div class="mem-item"><span>Notes</span><span id="notesCount">—</span></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Projects Tab -->
+            <div class="tab-panel" id="panel-projects">
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <h3>Projects</h3>
+                        <button class="add-btn" onclick="openProjectModal()" title="Add project">+</button>
+                    </div>
+                    <div class="project-list-full" id="projectListFull">
+                        <div class="empty-state">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Tab -->
+            <div class="tab-panel" id="panel-memory">
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <h3>Brain</h3>
+                        <div class="mem-header-btns">
+                            <button class="mem-action-btn" onclick="openTeachModal()" title="Teach JARVIS something">+ Teach</button>
+                            <button class="mem-action-btn import-btn" onclick="openImportModal()" title="Import from AI">↑ Import</button>
+                        </div>
+                    </div>
+                    <div class="mem-search-row">
+                        <input type="text" id="memSearchInput" placeholder="Search memories..." class="form-input mem-search" oninput="debounceMemSearch()">
+                    </div>
+                    <div class="mem-source-filter" id="memSourceFilter"></div>
+                    <div class="memory-list" id="memoryList">
+                        <div class="empty-state">Loading memories...</div>
+                    </div>
+                    <div class="mem-pagination" id="memPagination"></div>
                 </div>
             </div>
 
@@ -250,6 +274,182 @@
                 </div>
             </div>
         </aside>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  MODALS                                  -->
+    <!-- ════════════════════════════════════════ -->
+
+    <!-- Import Memory Modal -->
+    <div class="modal-overlay hidden" id="importModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Import Memory</h2>
+                <button class="modal-close" onclick="closeModal('importModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Import your conversation history from any AI assistant. JARVIS will learn from your past conversations.</p>
+                <div class="import-source-btns">
+                    <button class="source-btn active" data-source="auto" onclick="selectSource(this,'auto')">Auto-detect</button>
+                    <button class="source-btn" data-source="chatgpt" onclick="selectSource(this,'chatgpt')">ChatGPT</button>
+                    <button class="source-btn" data-source="claude" onclick="selectSource(this,'claude')">Claude</button>
+                    <button class="source-btn" data-source="gemini" onclick="selectSource(this,'gemini')">Gemini</button>
+                    <button class="source-btn" data-source="text" onclick="selectSource(this,'text')">Text / MD</button>
+                </div>
+                <div class="import-how" id="importHowTo">
+                    <strong>How to export from ChatGPT:</strong> Settings → Data Controls → Export Data → Download → upload <code>conversations.json</code><br>
+                    <strong>Claude:</strong> Settings → Export Data → upload the JSON file<br>
+                    <strong>Any AI:</strong> Paste raw conversation text or upload a .txt / .md file
+                </div>
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('importFile').click()">
+                    <div class="drop-icon">📂</div>
+                    <div class="drop-text">Drop file here or <span class="drop-link">browse</span></div>
+                    <div class="drop-sub">Supports .json, .txt, .md — up to 16 MB</div>
+                    <div class="drop-filename hidden" id="dropFilename"></div>
+                </div>
+                <input type="file" id="importFile" accept=".json,.txt,.md,.csv" style="display:none" onchange="handleImportFile(this)">
+                <div class="import-preview hidden" id="importPreview">
+                    <div class="preview-count" id="previewCount"></div>
+                    <div class="preview-samples" id="previewSamples"></div>
+                </div>
+                <div class="import-or">— or paste text directly —</div>
+                <textarea id="importPasteArea" class="form-input" rows="4" placeholder="Paste any conversation, notes, or context here..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('importModal')">Cancel</button>
+                <button class="modal-btn primary" id="importSubmitBtn" onclick="submitImport()">Import Memory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teach Modal -->
+    <div class="modal-overlay hidden" id="teachModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Teach JARVIS</h2>
+                <button class="modal-close" onclick="closeModal('teachModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Tell JARVIS something you want it to always remember — a fact, preference, context, or ongoing goal.</p>
+                <textarea id="teachContent" class="form-input" rows="5"
+                    placeholder="e.g. My main project is VORAX — an AI video SaaS. I prefer concise answers. I'm building with FastAPI + React..."></textarea>
+                <div class="form-row">
+                    <select id="teachCategory" class="form-input">
+                        <option value="user-taught">General</option>
+                        <option value="preference">Preference</option>
+                        <option value="project-context">Project Context</option>
+                        <option value="personal">Personal Info</option>
+                        <option value="technical">Technical</option>
+                        <option value="goal">Goal</option>
+                    </select>
+                    <select id="teachImportance" class="form-input">
+                        <option value="3">High importance</option>
+                        <option value="2">Medium</option>
+                        <option value="1">Low</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('teachModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="submitTeach()">Save Memory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Project Modal -->
+    <div class="modal-overlay hidden" id="projectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="projectModalTitle">New Project</h2>
+                <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <input type="hidden" id="editProjectId">
+                    <div class="form-group">
+                        <label>Project Name *</label>
+                        <input type="text" id="projName" class="form-input" placeholder="e.g. VORAX">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="projStatus" class="form-input">
+                            <option value="active">Active</option>
+                            <option value="planning">Planning</option>
+                            <option value="paused">Paused</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Description</label>
+                        <input type="text" id="projDesc" class="form-input" placeholder="What is this project?">
+                    </div>
+                    <div class="form-group">
+                        <label>Tech Stack</label>
+                        <input type="text" id="projStack" class="form-input" placeholder="e.g. FastAPI + React">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="projPriority" class="form-input">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Technologies (comma-separated)</label>
+                        <input type="text" id="projTech" class="form-input" placeholder="e.g. Groq, Sarvam AI, Pexels">
+                    </div>
+                    <div class="form-group full">
+                        <label>Goals / Context</label>
+                        <textarea id="projGoals" class="form-input" rows="3" placeholder="What are you trying to build? Any important context JARVIS should know..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Project URL</label>
+                        <input type="text" id="projUrl" class="form-input" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Local Path</label>
+                        <input type="text" id="projPath" class="form-input" placeholder="e.g. d:/projects/vorax">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('projectModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="submitProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay hidden" id="profileModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Your Profile</h2>
+                <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-avatar-preview">
+                    <div class="profile-avatar" id="profileAvatarPreview">U</div>
+                </div>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="profileName" class="form-input" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>AI Model</label>
+                    <select id="profileModel" class="form-input">
+                        <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Default)</option>
+                        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                        <option value="gemma2-9b-it">Gemma 2 9B</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('profileModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="submitProfile()">Save Profile</button>
+            </div>
+        </div>
     </div>
 
     <!-- Toast container -->

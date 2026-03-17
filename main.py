@@ -45,6 +45,7 @@ from flask_socketio import SocketIO
 from core.brain import ask_jarvis
 from core.memory import Memory
 from core.context import ProjectContext
+from core.importer import parse_import
 from config import Config
 from tools.voice_out import VoiceOutput
 
@@ -79,6 +80,16 @@ config = Config()
 memory = Memory()
 project_context = ProjectContext()
 voice_output = VoiceOutput()
+
+# ── Module-level startup (runs under gunicorn too) ────────
+config.load()
+memory.initialize()
+_json_path = PROJECT_ROOT / 'data' / 'projects.json'
+memory.seed_projects_from_json(str(_json_path))
+try:
+    project_context.load_projects()
+except Exception:
+    pass
 
 # ── App state ─────────────────────────────
 jarvis_state = {
@@ -350,12 +361,142 @@ def delete_note_api(note_id):
     memory.delete_note(note_id)
     return jsonify({'success': True})
 
+# ── User Profile ──────────────────────────
+@app.route('/api/profile', methods=['GET'])
+def get_profile():
+    return jsonify(memory.get_profile())
+
+@app.route('/api/profile', methods=['POST'])
+def update_profile():
+    data = request.json or {}
+    memory.update_profile(data)
+    return jsonify({'success': True, 'profile': memory.get_profile()})
+
+# ── Memory Browse / Teach / Delete ────────
+@app.route('/api/memory/browse', methods=['GET'])
+def browse_memories():
+    category = request.args.get('category')
+    source   = request.args.get('source')
+    limit    = int(request.args.get('limit', 50))
+    offset   = int(request.args.get('offset', 0))
+    q        = request.args.get('q', '').strip()
+    if q:
+        items = memory.search(q, limit=limit)
+    else:
+        items = memory.get_all_memories(category=category, source=source, limit=limit, offset=offset)
+    sources = memory.get_memory_sources()
+    return jsonify({'memories': items, 'sources': sources, 'total': len(items)})
+
+@app.route('/api/memory/teach', methods=['POST'])
+def teach_memory():
+    data = request.json or {}
+    content  = data.get('content', '').strip()
+    category = data.get('category', 'user-taught').strip() or 'user-taught'
+    importance = int(data.get('importance', 3))
+    if not content:
+        return jsonify({'success': False, 'error': 'Content required'}), 400
+    memory.add(content, category=category, importance=importance, source='manual')
+    return jsonify({'success': True, 'message': 'Memory saved'})
+
+@app.route('/api/memory/<int:memory_id>', methods=['DELETE'])
+def delete_memory(memory_id):
+    memory.delete_memory(memory_id)
+    return jsonify({'success': True})
+
+@app.route('/api/memory/import', methods=['POST'])
+def import_memory():
+    # Support both JSON body and file upload
+    source_hint = request.args.get('source', 'auto')
+
+    if request.files.get('file'):
+        f = request.files['file']
+        filename = f.filename or 'upload'
+        try:
+            content = f.read().decode('utf-8', errors='replace')
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 400
+    else:
+        data = request.json or {}
+        content  = data.get('content', '')
+        filename = data.get('filename', 'manual')
+        source_hint = data.get('source', 'auto')
+
+    if not content.strip():
+        return jsonify({'success': False, 'error': 'No content provided'}), 400
+
+    memories, detected = parse_import(content, filename, source=source_hint)
+    if not memories:
+        return jsonify({'success': False, 'error': 'No memories could be extracted from the file'}), 400
+
+    # Limit to 2000 items per import
+    memories = memories[:2000]
+    category = f"imported-{detected}"
+    memory.bulk_add(memories, category=category, source=detected)
+    memory.log_import(detected, filename, len(memories))
+    log.info(f"Memory import: {len(memories)} items from '{filename}' (format: {detected})")
+    return jsonify({
+        'success': True,
+        'imported': len(memories),
+        'format': detected,
+        'preview': memories[:3]
+    })
+
+@app.route('/api/memory/import/history', methods=['GET'])
+def import_history():
+    return jsonify(memory.get_import_history())
+
 # ── Projects ──────────────────────────────
 @app.route('/api/projects', methods=['GET'])
 def get_projects():
-    return jsonify(project_context.get_all_projects())
+    return jsonify(memory.get_projects())
 
-@app.route('/api/projects/<project_name>', methods=['POST'])
+@app.route('/api/projects', methods=['POST'])
+def create_project():
+    data = request.json or {}
+    name = data.get('name', '').strip()
+    if not name:
+        return jsonify({'success': False, 'error': 'Project name required'}), 400
+    try:
+        tech = data.get('tech', [])
+        if isinstance(tech, str):
+            tech = [t.strip() for t in tech.split(',') if t.strip()]
+        new_id = memory.add_project(
+            name=name,
+            description=data.get('description', ''),
+            stack=data.get('stack', ''),
+            tech=tech,
+            goals=data.get('goals', ''),
+            url=data.get('url', ''),
+            path=data.get('path', ''),
+            status=data.get('status', 'active'),
+            priority=data.get('priority', 'medium'),
+            color=data.get('color', '#00d4ff'),
+        )
+        return jsonify({'success': True, 'id': new_id})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/projects/<int:project_id>', methods=['GET'])
+def get_project(project_id):
+    p = memory.get_project(project_id)
+    if not p:
+        return jsonify({'error': 'Project not found'}), 404
+    return jsonify(p)
+
+@app.route('/api/projects/<int:project_id>', methods=['PUT'])
+def update_project(project_id):
+    data = request.json or {}
+    if 'tech' in data and isinstance(data['tech'], str):
+        data['tech'] = [t.strip() for t in data['tech'].split(',') if t.strip()]
+    memory.update_project(project_id, data)
+    return jsonify({'success': True})
+
+@app.route('/api/projects/<int:project_id>', methods=['DELETE'])
+def delete_project(project_id):
+    memory.delete_project(project_id)
+    return jsonify({'success': True})
+
+@app.route('/api/projects/<project_name>/switch', methods=['POST'])
 def switch_project(project_name):
     project_context.switch_project(project_name)
     jarvis_state['current_project'] = project_name
@@ -452,8 +593,17 @@ def main():
     memory.initialize()
     log.info("Memory initialized")
 
+    # One-time migration: seed projects from JSON into SQLite
+    json_path = PROJECT_ROOT / 'data' / 'projects.json'
+    seeded = memory.seed_projects_from_json(str(json_path))
+    if seeded:
+        log.info(f"Seeded {seeded} projects from projects.json")
+
     project_context.load_projects()
     log.info(f"Projects loaded: {len(project_context.projects)}")
+
+    profile = memory.get_profile()
+    log.info(f"User profile: {profile.get('name', 'User')}")
 
     start_background_tasks()
 
